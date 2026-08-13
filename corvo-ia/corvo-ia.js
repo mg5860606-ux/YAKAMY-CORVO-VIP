@@ -452,9 +452,14 @@ async function enviarResposta(corvo, jid, res, msgOrig) {
         for (const fala of falas) {
           const buf = await getTts().ttsToAudio(fala);
           if (buf && buf.length) {
-            // 🐛 FIX áudio corrompido: o ttsToAudio retorna MP3, mas o WhatsApp
-            // (Baileys) espera OGG/OPUS para nota de voz (ptt) — enviar MP3
-            // como ptt corrompe o áudio no cliente. Converte com ffmpeg.
+            // 🎙️ Simula presença "gravando áudio..." antes de enviar a nota de voz
+            try {
+              if (typeof corvo.sendPresenceUpdate === 'function') {
+                await corvo.sendPresenceUpdate('recording', jid);
+              }
+            } catch (e) {}
+
+            // 🎵 Converte MP3 do TTS para OGG Opus nativo do WhatsApp (Nota de Voz PTT)
             try {
               const ogg = await getTts().converterParaOggOpus(buf);
               await corvo.sendMessage(jid, {
@@ -463,12 +468,11 @@ async function enviarResposta(corvo, jid, res, msgOrig) {
                 mimetype: 'audio/ogg; codecs=opus',
               });
             } catch (e) {
-              // ⚠️ Conversão falhou: manda o MP3 original como áudio comum
-              // (SEM ptt e com o mimetype certo) — rotular MP3 como OGG/pTT
-              // reproduziria a corrupção. Áudio comum toca MP3 sem problema.
+              // Fallback se a conversão Opus falhar
               await corvo.sendMessage(jid, {
                 audio: buf,
-                mimetype: 'audio/mpeg',
+                ptt: true,
+                mimetype: 'audio/mp4',
               });
             }
             enviouAlgum = true;
