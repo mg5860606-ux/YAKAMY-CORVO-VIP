@@ -1,0 +1,40 @@
+{
+  "id": "120363411204201531@g.us",
+  "addressingMode": "lid",
+  "subject": "👑 REINO DO CORVO 🦅",
+  "subjectOwner": "553493280608@s.whatsapp.net",
+  "subjectOwnerLid": "100000579211425@lid",
+  "subjectTime": 1786341528,
+  "size": 3,
+  "creation": 1786227632,
+  "owner": "553493280608@s.whatsapp.net",
+  "ownerLid": "100000579211425@lid",
+  "descOwner": "",
+  "descOwnerLid": "",
+  "restrict": false,
+  "announce": false,
+  "isCommunity": false,
+  "isCommunityAnnounce": false,
+  "joinApprovalMode": false,
+  "memberAddMode": true,
+  "participants": [
+    {
+      "id": "239475078774855@lid",
+      "jid": "559781049196@s.whatsapp.net",
+      "lid": "239475078774855@lid",
+      "admin": null
+    },
+    {
+      "id": "65361600893152@lid",
+      "jid": "555182860184@s.whatsapp.net",
+      "lid": "65361600893152@lid",
+      "admin": null
+    },
+    {
+      "id": "100000579211425@lid",
+      "jid": "553493280608@s.whatsapp.net",
+      "lid": "100000579211425@lid",
+      "admin": "superadmin"
+    }
+  ]
+}

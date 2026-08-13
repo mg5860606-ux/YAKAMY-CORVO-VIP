@@ -7040,7 +7040,7 @@ Usuário removido por enviar pagamento / mensagem endereçada no grupo.`,
 
             const repoUrl = "https://github.com/mg5860606-ux/YAKAMY-CORVO-VIP";
             await reply(
-              `🔄 *Atualizando o bot...*\n\n> Puxando a versão mais recente do repositório:\n\`${repoUrl}\`\n\n⏳ Isso pode levar alguns segundos...`
+              `🩷 𝒀𝑨𝑲𝑨𝑴𝒀𝒁𝑰𝑵𝑯𝑨 𝑺𝑬𝑵𝑫𝑶 𝑨𝑻𝑼𝑨𝑳𝑰𝒁𝑨𝑫𝑨... 🩷\n\n> Puxando a versão mais recente do repositório:\n\`${repoUrl}\`\n\n⏳ Isso pode levar alguns segundos...`
             );
 
             exec(
@@ -7058,12 +7058,25 @@ Usuário removido por enviar pagamento / mensagem endereçada no grupo.`,
                     .slice(-15)
                     .join("\n");
                   await reply(
-                    `✅ *Atualização concluída com sucesso!*\n\n\`\`\`\n${linhas}\n\`\`\`\n\n🔄 *Reiniciando em 5 segundos...*`
+                    `🩷 𝒀𝑨𝑲𝑨𝑴𝒀𝒁𝑰𝑵𝑯𝑨 𝑨𝑻𝑼𝑨𝑳𝑰𝒁𝑨𝑫𝑨 𝑪𝑶𝑴 𝑺𝑼𝑪𝑬𝑺𝑺𝑶! 🩷\n\n\`\`\`\n${linhas}\n\`\`\`\n\n🔄 *Reiniciando em 5 segundos...*`
                   );
 
-                  // Reinicia: sobe uma nova instância em processo separado (a
-                  // trava anti-duplicata do connect.js mata a antiga e assume)
+                  // 🔄 REINÍCIO AUTOMÁTICO após atualização:
+                  //  • PM2 (padrão em VPS): encerra com código ≠ 0 e o PM2
+                  //    sobe o app de novo sozinho — sem spawn de processo órfão
+                  //    (o código de saída propaga: connect.js → menu.js → PM2).
+                  //  • Sem PM2 (Termux/terminal): sobe uma nova instância em
+                  //    processo separado (a trava anti-duplicata do connect.js
+                  //    mata a antiga e assume) e só então sai do processo.
                   setTimeout(() => {
+                    const sobPm2 = !!(process.env.PM2_HOME || process.pm2);
+                    if (sobPm2) {
+                      console.log(
+                        "🔄 PM2 detectado — encerrando processo para o PM2 reiniciar com o código novo."
+                      );
+                      process.exit(1);
+                      return;
+                    }
                     try {
                       const nova = spawn("node", ["connect.js"], {
                         cwd: __dirname,
@@ -7084,7 +7097,7 @@ Usuário removido por enviar pagamento / mensagem endereçada no grupo.`,
                     (saida.match(/ATUALIZAR_ERRO:\s*(.+)/) || [])[1] ||
                     "falha desconhecida (veja o console do bot)";
                   await reply(
-                    `❌ *Falha na atualização*\n\n> ${motivo}\n\n🔒 Sessão do WhatsApp e configurações foram preservadas.`
+                    `🩷 𝒀𝑨𝑲𝑨𝑴𝒀𝒁𝑰𝑵𝑯𝑨 𝑵𝑨𝑶 𝑪𝑶𝑵𝑺𝑬𝑮𝑼𝑰𝑼 𝑨𝑻𝑼𝑨𝑳𝑰𝒁𝑨𝑹... 🩷\n\n> ${motivo}\n\n🔒 Sessão do WhatsApp e configurações foram preservadas.`
                   );
                 }
               }
@@ -14209,14 +14222,15 @@ ${cooldownTxt}\n${fixadoTxt}
                 },
                 {}
               );
-              await tokito.relayMessage(from, statusMsg.message, {
+              await corvo.relayMessage(from, statusMsg.message, {
                 messageId: statusMsg.key.id,
               });
+              console.log('POSTSTATUS: ✅ Status enviado via groupStatusMessageV2.');
             }
 
             // 📎 Mídia citada → envia junto como mensagem normal
             if (mediaFallback) {
-              await tokito.sendMessage(from, mediaFallback);
+              await corvo.sendMessage(from, mediaFallback);
             }
 
             await reagir(from, "✅");

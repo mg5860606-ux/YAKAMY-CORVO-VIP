@@ -107,7 +107,14 @@ executar_node() {
 
     trap restaurar_canvas EXIT
     
-    IS_TERMUX="$AMBIENTE" node connect.js $args
+    # 🐛 FIX: cardGenerator.js checa IS_TERMUX === "true" (não "termux").
+    # Antes passava "termux"/"sim" e o canvas era tentado mesmo no celular,
+    # falhando (e dependendo de como o npm install abortou, o boot quebrava).
+    if [ "$AMBIENTE" = "termux" ]; then
+        IS_TERMUX="true" node connect.js $args
+    else
+        IS_TERMUX="false" node connect.js $args
+    fi
     
     trap - EXIT
     restaurar_canvas

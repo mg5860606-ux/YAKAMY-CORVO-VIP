@@ -277,18 +277,25 @@ const getRandom = (ext) =>  {
 };
  
 const banner2 = cfonts.render(
-  `CORVO DEV`,
+  `BOT`,
   {
-    font: "console",
+    font: "block",
     align: "center",
     gradient: ["#ff4d00", "#ffd700"],
   }
 );
 
-const banner3 = cfonts.render(`CORVO DEV`, {
+const banner3 = cfonts.render(`YAKAMY`, {
   font: "block",
   align: "center",
   gradient: ["#00e5ff", "#ffe600"],
+});
+
+// 🔤 Linha de baixo: mantém o CORVO DEV original (fonte console) abaixo do BOT
+const banner4 = cfonts.render(`CORVO DEV`, {
+  font: "console",
+  align: "center",
+  gradient: ["#ff4d00", "#ffd700"],
 });
 
 function temporizador(segundos) {
@@ -373,6 +380,7 @@ module.exports = {
   isFiltered,
   addFilter,
   banner3,
+  banner4,
   chyt,
   getExtension,
   convertSticker,

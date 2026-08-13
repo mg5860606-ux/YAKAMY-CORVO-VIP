@@ -6,7 +6,17 @@ const {
   getPatenteForLevel,
 } = require("./levelingUtils");
 
-const IS_TERMUX = process.env.IS_TERMUX === "true";
+// 🐛 FIX 2026-08-13: detecção de Termux/Android robusta.
+// Antes só aceitava IS_TERMUX === "true" (o start.sh mandava "termux" e o
+// canvas era tentado no celular mesmo assim, falhando no load). Agora aceita
+// qualquer valor verdadeiro, a env TERMUX_VERSION (padrão do Termux) e o
+// platform android.
+const IS_TERMUX =
+  ["true", "1", "termux", "sim", "yes"].includes(
+    String(process.env.IS_TERMUX || "").toLowerCase()
+  ) ||
+  !!process.env.TERMUX_VERSION ||
+  process.platform === "android";
 let createCanvas, loadImage, registerFont;
 let CANVAS_DISPONIVEL = false;
 
@@ -83,40 +93,52 @@ function getProfileImage(user) {
 }
 
 async function generateUserCard(user) {
-  if (!CANVAS_DISPONIVEL) {
-    console.log(
-      "generateUserCard chamado, mas Canvas indisponível. Retornando null."
+  // 🐛 FIX 2026-08-13: o cartão NUNCA pode derrubar o bot. Se algo falhar
+  // (assets ausentes, fonte faltando, canvas indisponível), retorna null e o
+  // chamador cai no fallback de texto.
+  try {
+    if (!CANVAS_DISPONIVEL) {
+      console.log(
+        "generateUserCard chamado, mas Canvas indisponível. Retornando null."
+      );
+      return null;
+    }
+
+    const assetsDir = path.join(__dirname, "./canva/assets/");
+    if (!fs.existsSync(path.join(assetsDir, "background"))) {
+      console.log(
+        "generateUserCard: pasta canva/assets/background ausente. Retornando null."
+      );
+      return null;
+    }
+
+    const level = user.level || 0;
+    const xp = user.xp || 0;
+    const xpNoNivel = xp - getTotalXPForLevel(level);
+    const xpTotalDoNivel = getXPForLevelUp(level);
+    const progressoPercent = Math.min(1, xpNoNivel / xpTotalDoNivel);
+
+    const totalFrames = 49;
+    const xpFrameNumber = Math.max(
+      1,
+      Math.min(totalFrames, Math.ceil(progressoPercent * totalFrames))
     );
-    return null;
-  }
+    const backgroundFiles = fs.readdirSync(path.join(assetsDir, "background"));
+    if (!backgroundFiles.length) return null;
+    const assets = {
+      background:
+        backgroundFiles[Math.floor(Math.random() * backgroundFiles.length)],
+      mainFrame: "main_frame.png",
+      avatarFrame: "avatar_frame.png",
+      xpBar: `xp_bar${xpFrameNumber}.png`,
+    };
 
-  const level = user.level || 0;
-  const xp = user.xp || 0;
-  const xpNoNivel = xp - getTotalXPForLevel(level);
-  const xpTotalDoNivel = getXPForLevelUp(level);
-  const progressoPercent = Math.min(1, xpNoNivel / xpTotalDoNivel);
-
-  const assetsDir = path.join(__dirname, "./canva/assets/");
-  const totalFrames = 49;
-  const xpFrameNumber = Math.max(
-    1,
-    Math.min(totalFrames, Math.ceil(progressoPercent * totalFrames))
-  );
-  const backgroundFiles = fs.readdirSync(path.join(assetsDir, "background"));
-  const assets = {
-    background:
-      backgroundFiles[Math.floor(Math.random() * backgroundFiles.length)],
-    mainFrame: "main_frame.png",
-    avatarFrame: "avatar_frame.png",
-    xpBar: `xp_bar${xpFrameNumber}.png`,
-  };
-
-  const [background, mainFrame, avatarFrame, xpBar] = await Promise.all([
-    loadImage(path.join(assetsDir, "background", assets.background)),
-    loadImage(path.join(assetsDir, "borders", assets.mainFrame)),
-    loadImage(path.join(assetsDir, "borders", assets.avatarFrame)),
-    loadImage(path.join(assetsDir, "xp_bar", assets.xpBar)),
-  ]);
+    const [background, mainFrame, avatarFrame, xpBar] = await Promise.all([
+      loadImage(path.join(assetsDir, "background", assets.background)),
+      loadImage(path.join(assetsDir, "borders", assets.mainFrame)),
+      loadImage(path.join(assetsDir, "borders", assets.avatarFrame)),
+      loadImage(path.join(assetsDir, "xp_bar", assets.xpBar)),
+    ]);
 
   const canvas = createCanvas(designConfig.width, designConfig.height);
   const ctx = canvas.getContext("2d");
@@ -194,6 +216,15 @@ async function generateUserCard(user) {
   );
 
   return canvas.toBuffer("image/png");
+  } catch (e) {
+    // 🐛 FIX 2026-08-13: qualquer erro de geração (asset corrompido, fonte
+    // faltando, imagem inválida) vira null — o chamador cai no fallback.
+    console.log(
+      "generateUserCard: erro ao gerar cartão, usando fallback:",
+      e && e.message ? e.message : e
+    );
+    return null;
+  }
 }
 
 module.exports = { generateUserCard };

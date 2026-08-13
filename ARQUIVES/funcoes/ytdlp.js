@@ -40,13 +40,18 @@ function fonte(termo) {
  */
 async function buscarMeta(termo) {
   try {
+    console.log('[YTDLP] Buscando metadados para:', termo);
     const saida = await youtubedl(fonte(termo), Object.assign({}, BASE_OPTS, {
       dumpSingleJson: true,
       skipDownload: true,
       noWarnings: true,
     }));
     const j = (typeof saida === 'string') ? JSON.parse(saida) : saida;
-    if (!j || !j.title) return { ok: false, erro: 'Sem resultados.' };
+    if (!j || !j.title) {
+      console.error('[YTDLP] Sem resultados encontrados para:', termo);
+      return { ok: false, erro: 'Sem resultados.' };
+    }
+    console.log('[YTDLP] ✅ Metadados encontrados:', j.title);
     return {
       ok: true,
       titulo: j.title,
@@ -57,6 +62,7 @@ async function buscarMeta(termo) {
       thumb: j.thumbnail || null,
     };
   } catch (e) {
+    console.error('[YTDLP] ❌ Erro ao buscar metadados:', e.message || String(e));
     return { ok: false, erro: e.message || String(e) };
   }
 }

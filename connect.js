@@ -91,6 +91,7 @@ const {
   data,
   banner3,
   banner2,
+  banner4,
   LoggerB,
   fs,
   peth,
@@ -943,6 +944,7 @@ async function connectToWhatsApp() {
         case "open":
           console.log(banner3.string);
           console.log(banner2.string);
+          console.log(banner4.string);
           console.log(
             `${colors.white("𝐎𝐥𝐚 𝐡𝐮𝐦𝐚𝐧𝐨, 𝐞𝐮 𝐬𝐨𝐮 𝒂 𝒀𝑨𝑲𝑨𝑴𝒀, 𝐚𝐠𝐮𝐚𝐫𝐝𝐞 𝟓 𝐬𝐞𝐠𝐮𝐧𝐝𝐨𝐬")}`
           );
@@ -1061,7 +1063,8 @@ ${moldura}
               await tokito.updateProfileStatus(frase);
               lastBioUpdate = Date.now();
               bioRejeitadaEm = 0; // reset após sucesso
-              console.log(`✅ Bio atualizada (${motivo}) para: ${frase}`);
+              // 🔕 FIX 2026-08-13: log removido a pedido — o console não deve
+              // mais exibir "✅ Bio atualizada..." a cada reconexão.
             } catch (e) {
               const msgErro = (e && e.message) || '';
               const isRate = e && (

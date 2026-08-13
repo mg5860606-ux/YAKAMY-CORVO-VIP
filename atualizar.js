@@ -35,17 +35,61 @@ const REPO_URL = "https://github.com/mg5860606-ux/YAKAMY-CORVO-VIP";
 const BACKUP_DIR = path.join(ROOT, "corvo_dados", ".update_backup");
 
 // Dados locais que NUNCA podem ser sobrescritos pelo repositório
+// ⚠️ IMPORTANTE: qualquer arquivo de config/dados do DONO rastreado pelo git
+// precisa estar aqui — senão o `git reset --hard` do update restaura a versão
+// do repositório e apaga a configuração local (número do dono, nome do bot,
+// APIs como Gemini, logos, dados de grupos...).
 const PROTEGIDOS = [
-  "corvo_dados/qrcode", // 📱 sessão do WhatsApp (não pode perder!)
-  "INFON/DADOS/config.json", // ⚙️ config principal (dono/prefixo/nome do bot)
-  "INFON/media/nescessario.json", // ⚙️ números de dono
-  "corvo-ia/config.js", // ⚙️ config da IA
-  "corvo-ia/data", // 🧠 memória/chaves da IA
-  "corvo_dados/usuarios", // 👥 usuários (vip/bans/leveling)
-  "corvo_dados/func", // ⚙️ dados internos (coins, casamento, tmgroup...)
-  "corvo_dados/grupos", // 👥 configurações dos grupos
-  ".env", // 🔑 variáveis de ambiente
-  "package.json", // 📦 usado para detectar se as dependências mudaram
+  // 📱 Sessão do WhatsApp (não pode perder!)
+  "corvo_dados/qrcode",
+
+  // ⚙️ Config principal do bot (dono/prefixo/nome do bot/API URL)
+  "INFON/DADOS/config.json",
+  // ⚙️ Números de dono e configurações de segurança
+  "INFON/media/nescessario.json",
+  // ⚙️ Config da IA (admin, chaves, APIs)
+  "corvo-ia/config.js",
+  // 🧠 Memória/chaves da IA
+  "corvo-ia/data",
+
+  // 👥 Usuários (vip/bans/leveling/nomes)
+  "corvo_dados/usuarios",
+  // ⚙️ Dados internos (coins, casamento, tmgroup, limitarcmd...)
+  "corvo_dados/func",
+  // 👥 Configurações dos grupos (inclui ATIVAÇÕES/)
+  "corvo_dados/grupos",
+  // ⚙️ Dados do bot (ia_switch, auditoria, figurinhas...)
+  "corvo_dados/data",
+  // 📊 Estatísticas locais (stats.json, totalcmd.json)
+  "corvo_dados/anti_sp.json",
+  "corvo_dados/antiarqv.json",
+  "corvo_dados/diario.json",
+  "corvo_dados/pprt_config.json",
+  "corvo_dados/questions.json",
+  "corvo_dados/take.json",
+  "corvo_dados/vdddsf.json",
+
+  // 🎵 Áudios / logos / mídias customizadas pelo dono
+  "INFON/media/audios.json",
+  "INFON/media/antispam.json",
+  "INFON/media/comandos.json",
+  "INFON/media/countmsg.json",
+  "INFON/media/patentes.json",
+  "INFON/LOGOS/logos.json",
+  "INFON/LOGOS/links_img.json",
+
+  // 🎲 Dados de jogos/funções locais
+  "ARQUIVES/json/acoes.json",
+  "ARQUIVES/json/advices.json",
+  "ARQUIVES/json/slots.json",
+  "ARQUIVES/json/sotoy.json",
+  "ARQUIVES/json/tools.json",
+  "ARQUIVES/json/vab.json",
+
+  // 🔑 Variáveis de ambiente (chaves Gemini/APIs — NUNCA sobrescrever)
+  ".env",
+  // 📦 Usado para detectar se as dependências mudaram
+  "package.json",
 ];
 
 function log(msg) {
