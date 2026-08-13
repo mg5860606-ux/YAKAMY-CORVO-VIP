@@ -6,11 +6,10 @@ corvo_dados/.update_backup/
 session/
 *.log
 
-# 📦 Dependências
-node_modules/
 
 # 🧹 Temporários
 temp_videos/
 temp/
 tmp/
 *.tmp
+node_modules
