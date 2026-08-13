@@ -409,7 +409,7 @@ async function connectToWhatsApp() {
   }
 
   const corvo = makeWASocket({
-  version: [2, 3000, 1044409164], // ← versão atual (sw.js client_revision)
+  version,
   logger,
   emitOwnEvents: true,
   fireInitQueries: true,
@@ -423,7 +423,7 @@ async function connectToWhatsApp() {
   msgRetryCounterCache,
   printQRInTerminal: !usePairingCode,
   auth: state,
-  browser: ["Ubuntu", "Edge", "110.0.1587.56"],
+  browser: ["Ubuntu", "Chrome", "20.0.04"],
   generateHighQualityLinkPreview: true,
   patchMessageBeforeSending: (message) => {
     const requiresPatch = !!message?.interactiveMessage;
