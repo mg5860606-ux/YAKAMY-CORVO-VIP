@@ -478,8 +478,17 @@ async function connectToWhatsApp() {
     const phoneNumber = await question(
       `${colors.cyan("\n. Use seu número de telefone. Exemplo: 5511555555555:\n")}`
     );
-    let numerosColetados = collectNumbers(phoneNumber);
-    const code = await tokito.requestPairingCode(numerosColetados);
+    let code;
+    for (let tentativa = 1; tentativa <= 5; tentativa++) {
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        code = await tokito.requestPairingCode(numerosColetados);
+        if (code) break;
+      } catch (e) {
+        if (tentativa === 5) throw e;
+        console.log(colors.yellow(`⏳ Aguardando conexão do WhatsApp (tentativa ${tentativa}/5)...`));
+      }
+    }
     console.log(
       `\n${colors.magenta("Aqui está o código de pareamento:")} ${colors.cyan(code)}\n–\n${colors.yellow("• Vá até o whatsapp > Clique nos 3 pontinhos > Dispositivos conectados > Conectar via código > Cole o codigo la e aguarde.")}`
     );
