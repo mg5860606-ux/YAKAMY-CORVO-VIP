@@ -1,13 +1,13 @@
 {
   "botStartTime": "2026-08-13T01:22:14.853Z",
   "globalStats": {
-    "totalMessages": 193,
-    "totalCommands": 193
+    "totalMessages": 326,
+    "totalCommands": 326
   },
   "users": {
     "553493280608@s.whatsapp.net": {
       "lastSeenName": "",
-      "totalMessages": 53,
+      "totalMessages": 79,
       "perGroup": {}
     },
     "5521990682259@s.whatsapp.net": {
@@ -49,16 +49,16 @@
     },
     "553492041435@s.whatsapp.net": {
       "lastSeenName": "LYYA",
-      "totalMessages": 3,
+      "totalMessages": 5,
       "perGroup": {
-        "120363427156718967@g.us": 3
+        "120363427156718967@g.us": 5
       }
     },
     "558981389380@s.whatsapp.net": {
       "lastSeenName": "🌪️",
-      "totalMessages": 2,
+      "totalMessages": 16,
       "perGroup": {
-        "120363409992830431@g.us": 2
+        "120363409992830431@g.us": 16
       }
     },
     "5516992551698@s.whatsapp.net": {
@@ -84,9 +84,9 @@
     },
     "559992110457@s.whatsapp.net": {
       "lastSeenName": "Yandra",
-      "totalMessages": 5,
+      "totalMessages": 62,
       "perGroup": {
-        "120363409992830431@g.us": 5
+        "120363409992830431@g.us": 62
       }
     },
     "558892966720@s.whatsapp.net": {
@@ -98,9 +98,9 @@
     },
     "559781049196@s.whatsapp.net": {
       "lastSeenName": "tarkat'",
-      "totalMessages": 1,
+      "totalMessages": 3,
       "perGroup": {
-        "120363411204201531@g.us": 1
+        "120363411204201531@g.us": 3
       }
     },
     "559491855060@s.whatsapp.net": {
@@ -179,20 +179,41 @@
       "perGroup": {
         "120363413745946962@g.us": 1
       }
+    },
+    "555191206042@s.whatsapp.net": {
+      "lastSeenName": "Nanii💜",
+      "totalMessages": 4,
+      "perGroup": {
+        "120363413745946962@g.us": 4
+      }
+    },
+    "556392333139@s.whatsapp.net": {
+      "lastSeenName": "†JᴏᴀᴏﾠPᴇᴅʀᴏﾠ",
+      "totalMessages": 2,
+      "perGroup": {
+        "120363413745946962@g.us": 2
+      }
+    },
+    "557382432175@s.whatsapp.net": {
+      "lastSeenName": "🇴 🇷 🇹 🇭 🇮 🇪",
+      "totalMessages": 26,
+      "perGroup": {
+        "120363409992830431@g.us": 26
+      }
     }
   },
   "groups": {
     "120363413745946962@g.us": {
-      "totalMessages": 100
+      "totalMessages": 106
     },
     "120363427156718967@g.us": {
-      "totalMessages": 12
+      "totalMessages": 14
     },
     "120363409992830431@g.us": {
-      "totalMessages": 24
+      "totalMessages": 121
     },
     "120363411204201531@g.us": {
-      "totalMessages": 4
+      "totalMessages": 6
     }
   }
 }
