@@ -217,21 +217,42 @@ const VOZ_GEMINI = 'Kore';
  */
 function acharBlocoAudio(data) {
   try {
-    const steps = data?.steps;
-    if (!Array.isArray(steps)) return null;
-    let ultimo = null;
-    for (const s of steps) {
-      const c = s?.content;
-      if (!c || typeof c !== 'object') continue;
-      const valores = Array.isArray(c) ? c : Object.values(c);
-      for (const v of valores) {
-        if (v && typeof v === 'object' && v.data &&
-            (v.type === 'audio' || String(v.mime_type || '').startsWith('audio') || v.sample_rate)) {
-          ultimo = v; // sobrescreve: o ÚLTIMO bloco de áudio é o oficial
+    const parts = data?.candidates?.[0]?.content?.parts;
+    if (Array.isArray(parts)) {
+      for (const p of parts) {
+        if (p.inlineData && p.inlineData.data) {
+          let sampleRate = 24000;
+          let channels = 1;
+          const mime = String(p.inlineData.mimeType || '');
+          const matchRate = mime.match(/rate=(\d+)/);
+          if (matchRate) sampleRate = parseInt(matchRate[1], 10);
+          const matchChan = mime.match(/channels=(\d+)/);
+          if (matchChan) channels = parseInt(matchChan[1], 10);
+          return {
+            data: p.inlineData.data,
+            sample_rate: sampleRate,
+            channels: channels,
+            mime_type: mime,
+          };
         }
       }
     }
-    return ultimo;
+    const steps = data?.steps;
+    if (Array.isArray(steps)) {
+      let ultimo = null;
+      for (const s of steps) {
+        const c = s?.content;
+        if (!c || typeof c !== 'object') continue;
+        const valores = Array.isArray(c) ? c : Object.values(c);
+        for (const v of valores) {
+          if (v && typeof v === 'object' && v.data &&
+              (v.type === 'audio' || String(v.mime_type || '').startsWith('audio') || v.sample_rate)) {
+            ultimo = v; // sobrescreve: o ÚLTIMO bloco de áudio é o oficial
+          }
+        }
+      }
+      return ultimo;
+    }
   } catch (e) { /* resposta malformada → null */ }
   return null;
 }
@@ -278,21 +299,25 @@ async function ttsGemini(texto) {
     for (const modelo of modelos) {
       try {
         const r = await axios.post(
-          `https://generativelanguage.googleapis.com/v1beta/interactions?key=${chave}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${chave}`,
           {
-            model: modelo,
-            input: prompt,
-            response_format: { type: 'audio' },
-            generation_config: { speech_config: [{ voice: VOZ_GEMINI }] },
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              responseModalities: ['AUDIO'],
+              speechConfig: {
+                voiceConfig: {
+                  prebuiltVoiceConfig: { voiceName: VOZ_GEMINI }
+                }
+              }
+            }
           },
-          // ⏱ Timeout curto por tentativa: 6 chaves × 2 modelos — se uma
-          // pendurar, a voz cai pro Edge rápido em vez de travar a resposta.
+          // ⏱ Timeout curto por tentativa: se uma pendurar, cai pro próximo modelo/chave
           { timeout: 25000, headers: { 'Content-Type': 'application/json' } }
         );
         // 📊 Conta o uso do TTS no /apistatus (mesmo padrão do resto do bot)
         try {
           const { recordUsage } = require('../ia/ia_gemini');
-          const tokensTTS = r.data?.usage?.totalTokens || 0;
+          const tokensTTS = r.data?.usageMetadata?.totalTokenCount || r.data?.usage?.totalTokens || 0;
           recordUsage(tokensTTS);
         } catch (e) { /* falha no contador não derruba a voz */ }
         const bloco = acharBlocoAudio(r.data);

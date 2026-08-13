@@ -429,7 +429,7 @@ async function connectToWhatsApp() {
     const requiresPatch = !!message?.interactiveMessage;
     if (requiresPatch) {
       message = {
-        viewOnceMessage: {
+        viewOnceMessageV2Extension: {
           message: {
             messageContextInfo: {
               deviceListMetadataVersion: 2,

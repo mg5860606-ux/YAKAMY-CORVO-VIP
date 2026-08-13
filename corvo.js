@@ -26388,7 +26388,6 @@ manter tudo organizado, não é?"
                 },
               ],
               headerType: 4,
-              viewOnce: true,
             });
           } catch (error) {
             console.error("Erro ao executar o comando 'menu':", error);
