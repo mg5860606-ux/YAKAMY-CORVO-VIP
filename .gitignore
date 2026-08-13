@@ -1,0 +1,16 @@
+# 🔐 Segurança — nunca subir chaves/sessão
+.env
+corvo-ia/data/
+corvo_dados/qrcode/
+corvo_dados/.update_backup/
+session/
+*.log
+
+# 📦 Dependências
+node_modules/
+
+# 🧹 Temporários
+temp_videos/
+temp/
+tmp/
+*.tmp

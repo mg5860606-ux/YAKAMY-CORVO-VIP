@@ -1,0 +1,54 @@
+{
+  "botStartTime": "2026-08-13T01:22:14.853Z",
+  "globalStats": {
+    "totalMessages": 107,
+    "totalCommands": 107
+  },
+  "users": {
+    "553493280608@s.whatsapp.net": {
+      "lastSeenName": "",
+      "totalMessages": 25,
+      "perGroup": {}
+    },
+    "5521990682259@s.whatsapp.net": {
+      "lastSeenName": "꧁༒𓆩🦇𓆪 𝐃𝐀𝐑𝐊 𝐃𝐘𝐀𝐁𝐘𝐍𝐇𝐎 𓆩🖤𓆪༒꧂",
+      "totalMessages": 39,
+      "perGroup": {
+        "120363413745946962@g.us": 39
+      }
+    },
+    "555182860184@s.whatsapp.net": {
+      "lastSeenName": "CORVO  </>",
+      "totalMessages": 35,
+      "perGroup": {
+        "120363413745946962@g.us": 35
+      }
+    },
+    "5511950239592@s.whatsapp.net": {
+      "lastSeenName": "𝘿𝘼𝙍𝙆 𝘿𝙔𝘼𝘽𝙔𝙉𝙃𝙊",
+      "totalMessages": 6,
+      "perGroup": {
+        "120363413745946962@g.us": 6
+      }
+    },
+    "557499264219@s.whatsapp.net": {
+      "lastSeenName": "Agência Pires",
+      "totalMessages": 1,
+      "perGroup": {
+        "120363413745946962@g.us": 1
+      }
+    },
+    "553299872987@s.whatsapp.net": {
+      "lastSeenName": "Dudu 💸",
+      "totalMessages": 1,
+      "perGroup": {
+        "120363413745946962@g.us": 1
+      }
+    }
+  },
+  "groups": {
+    "120363413745946962@g.us": {
+      "totalMessages": 82
+    }
+  }
+}

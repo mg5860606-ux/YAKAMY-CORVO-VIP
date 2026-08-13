@@ -1,0 +1,20 @@
+{
+  "prefix": "/",
+  "NomeDoBot": "𝒀𝑨𝑲𝑨𝑴𝒀",
+  "ownerName": "DARK DYABYNHO",
+  "channeldl": "",
+  "channel": "",
+  "ownerNumber": [
+    "5521990682259",
+    ""
+  ],
+  "botNumber": [
+    "553493280608",
+    ""
+  ],
+  "CREDENTIALS_USER": {
+    "API_KEY_BRONXYS": "tokito-md",
+    "API_URL": "https://api.bronxyshost.com.br"
+  },
+  "WARNING_NUMBER": "🌟 Olá, para configurar seu número na bot é preciso copiar da forma que está no WhatsApp, por exemplo: '5511915868989', se seu número conter um caractere à mais, adicione no número, dúvidas? Use o comando: [Prefix]Configurar-bot ou entre em contato com o criador do bot. Desde já, obrigado pela a atenção!"
+}
