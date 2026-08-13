@@ -7038,8 +7038,9 @@ Usuário removido por enviar pagamento / mensagem endereçada no grupo.`,
           {
             if (!SoDono) return;
 
+            const repoUrl = "https://github.com/mg5860606-ux/YAKAMY-CORVO-VIP";
             await reply(
-              `🩷 𝒀𝑨𝑲𝑨𝑴𝒀𝒁𝑰𝑵𝑯𝑨 𝑺𝑬𝑵𝑫𝑶 𝑨𝑻𝑼𝑨𝑳𝑰𝒁𝑨𝑫𝑨... 🩷\n\n> Puxando a versão mais recente do sistema...\n\n⏳ Isso pode levar alguns segundos...`
+              `🩷 𝒀𝑨𝑲𝑨𝑴𝒀𝒁𝑰𝑵𝑯𝑨 𝑺𝑬𝑵𝑫𝑶 𝑨𝑻𝑼𝑨𝑳𝑰𝒁𝑨𝑫𝑨... 🩷\n\n> Puxando a versão mais recente do repositório:\n\`${repoUrl}\`\n\n⏳ Isso pode levar alguns segundos...`
             );
 
             exec(
