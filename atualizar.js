@@ -235,38 +235,8 @@ function main() {
     } catch (e) {}
   }
 
-  // 8) reinstala dependências se o package.json mudou (comparação com o backup,
-  //    que AINDA existe nesta etapa — só é apagado no fim)
-  const pkgAntes = fs.existsSync(path.join(BACKUP_DIR, "package.json"))
-    ? fs.readFileSync(path.join(BACKUP_DIR, "package.json"), "utf8")
-    : "";
-  const pkgDepois = fs.existsSync(path.join(ROOT, "package.json"))
-    ? fs.readFileSync(path.join(ROOT, "package.json"), "utf8")
-    : "";
-  if (pkgAntes !== pkgDepois) {
-    log("package.json mudou — instalando dependências (pode demorar)...");
-    const inst = tryRun("npm install --legacy-peer-deps --no-audit --no-fund", {
-      timeout: 540000, // 9 min — sempre MENOR que o timeout do exec no corvo.js
-    });
-    if (!inst.ok) {
-      // ⚠️ Arquivos já foram atualizados, mas as dependências quebraram.
-      // Restaura o package.json antigo (para o bot continuar compatível com o
-      // node_modules atual), mantém o backup em corvo_dados/.update_backup e NÃO
-      // reporta sucesso — o bot não deve reiniciar com deps faltando.
-      copiar(path.join(BACKUP_DIR, "package.json"), path.join(ROOT, "package.json"));
-      console.log(
-        "ATUALIZAR_ERRO: os arquivos foram atualizados, mas o npm install falhou. " +
-          "O package.json anterior foi restaurado. Execute 'npm install' manualmente antes de reiniciar. " +
-          "Backup mantido em corvo_dados/.update_backup. " +
-          "Detalhes: " +
-          (inst.out.trim().split("\n").filter(Boolean).slice(-3).join(" | ") || "erro")
-      );
-      process.exit(1);
-    }
-    log("✅ Dependências instaladas.");
-  } else {
-    log("Dependências inalteradas.");
-  }
+  // 8) Atualização apenas do código do bot (sem mexer nos node_modules)
+  log("Módulos mantidos intactos (atualizando apenas o código do bot).");
 
   // 9) npm install ok (ou desnecessário) → backup pode ser removido
   limpar(BACKUP_DIR);
