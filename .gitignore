@@ -7,6 +7,9 @@ session/
 *.log
 
 
+# 📦 Dependências
+node_modules/
+
 # 🧹 Temporários
 temp_videos/
 temp/

@@ -235,8 +235,32 @@ function main() {
     } catch (e) {}
   }
 
-  // 8) Atualização apenas do código do bot (sem mexer nos node_modules)
-  log("Módulos mantidos intactos (atualizando apenas o código do bot).");
+  // 8) reinstala dependências se o package.json mudou
+  const pkgAntes = fs.existsSync(path.join(BACKUP_DIR, "package.json"))
+    ? fs.readFileSync(path.join(BACKUP_DIR, "package.json"), "utf8")
+    : "";
+  const pkgDepois = fs.existsSync(path.join(ROOT, "package.json"))
+    ? fs.readFileSync(path.join(ROOT, "package.json"), "utf8")
+    : "";
+  if (pkgAntes !== pkgDepois) {
+    log("package.json mudou — instalando dependências (pode demorar)...");
+    const inst = tryRun("npm install --legacy-peer-deps --no-audit --no-fund", {
+      timeout: 540000,
+    });
+    if (!inst.ok) {
+      copiar(path.join(BACKUP_DIR, "package.json"), path.join(ROOT, "package.json"));
+      console.log(
+        "ATUALIZAR_ERRO: os arquivos foram atualizados, mas o npm install falhou. " +
+          "O package.json anterior foi restaurado. Execute 'npm install' manualmente antes de reiniciar. " +
+          "Detalhes: " +
+          (inst.out.trim().split("\n").filter(Boolean).slice(-3).join(" | ") || "erro")
+      );
+      process.exit(1);
+    }
+    log("✅ Dependências instaladas.");
+  } else {
+    log("Dependências inalteradas.");
+  }
 
   // 9) npm install ok (ou desnecessário) → backup pode ser removido
   limpar(BACKUP_DIR);
