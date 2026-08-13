@@ -478,6 +478,7 @@ async function connectToWhatsApp() {
     const phoneNumber = await question(
       `${colors.cyan("\n. Use seu número de telefone. Exemplo: 5511555555555:\n")}`
     );
+    let numerosColetados = collectNumbers(phoneNumber);
     let code;
     for (let tentativa = 1; tentativa <= 5; tentativa++) {
       try {
