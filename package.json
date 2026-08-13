@@ -7,7 +7,7 @@
     "@whiskeysockets/baileys": "npm:baileys-mod@6.8.5",
     "acrcloud": "^1.4.0",
     "adm-zip": "^0.5.18",
-    "aki-api": "^x",
+    "aki-api": "^6.0.0",
     "assemblyai": "^2.0.2",
     "axios": "^1.18.1",
     "cfonts": "^2.10.0",

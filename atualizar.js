@@ -245,7 +245,7 @@ function main() {
     : "";
   if (pkgAntes !== pkgDepois) {
     log("package.json mudou — instalando dependências (pode demorar)...");
-    const inst = tryRun("npm install --no-audit --no-fund", {
+    const inst = tryRun("npm install --legacy-peer-deps --no-audit --no-fund", {
       timeout: 540000, // 9 min — sempre MENOR que o timeout do exec no corvo.js
     });
     if (!inst.ok) {
