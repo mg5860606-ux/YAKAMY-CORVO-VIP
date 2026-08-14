@@ -20,32 +20,9 @@ const IS_TERMUX =
 let createCanvas, loadImage, registerFont;
 let CANVAS_DISPONIVEL = false;
 
-if (!IS_TERMUX) {
-  try {
-    const canvas = require("canvas");
-    createCanvas = canvas.createCanvas;
-    loadImage = canvas.loadImage;
-    registerFont = canvas.registerFont;
-    CANVAS_DISPONIVEL = true;
-    console.log("Módulo Canvas carregado com sucesso.");
-
-    // Registra a fonte
-    const boldFontPath = path.join(
-      __dirname,
-      "./canva/fonts/Pixelify_Sans/static/PixelifySans-Bold.ttf"
-    );
-    registerFont(boldFontPath, { family: "Pixelify Sans" });
-  } catch (e) {
-    CANVAS_DISPONIVEL = false;
-    console.warn(
-      "⚠️ Aviso: Falha ao carregar o módulo Canvas. Recursos de imagem estarão indisponíveis."
-    );
-  }
-} else {
-  console.log(
-    "Ambiente Termux/Windows detectado. O módulo Canvas foi ignorado."
-  );
-}
+// 🐛 REMOVIDO CANVAS: O módulo canvas foi desativado completamente para evitar
+// crashes de compilação (ERR_DLOPEN_FAILED / invalid ELF header) na VexHost, Termux e Linux.
+console.log("Módulo Canvas desativado de forma permanente. O bot continuará rodando normalmente.");
 
 const designConfig = {
   width: 2048,
