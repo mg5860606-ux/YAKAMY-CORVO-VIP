@@ -13,17 +13,17 @@ RESET='\033[0m'
 print_msg() {
   local color=$1
   shift
-  echo  "${color}$*${RESET}"
+  echo -e "${color}$*${RESET}"
 }
 
 painel_tokito() {
   clear
-  echo  "${CYAN}"
+  echo -e "${CYAN}"
   echo "╔═══════════════════════════════════════════════════╗"
   echo "║      ${CYAN}🌫️ BOT 𝒀𝑨𝑲𝑨𝑴𝒀 — © ⏤͟͟͞͞𝒀𝑨𝑲𝑨𝑴𝒀  🌫️${CYAN}           ║"
   echo "║           \"A sua bondade é a única.\"     ║"
   echo "╚═══════════════════════════════════════════════════╝"
-  echo  "${RESET}"
+  echo -e "${RESET}"
 }
 
 instalar_dependencias() {
@@ -121,16 +121,16 @@ executar_node() {
 }
 
 menu() {
-  echo  "${CYAN}"
+  echo -e "${CYAN}"
   echo "╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮"
-  echo "${CYAN}""┃ ${CYAN}1.${RESET}${WHITE} Conectar com número (via código)${CYAN}""┃"
-  echo "${CYAN}""┃ ${CYAN}2.${RESET}${WHITE} Conectar via QR Code            ${CYAN}""┃"
-  echo "${CYAN}""┃ ${CYAN}3.${RESET}${WHITE} Reiniciar automático            ${CYAN}""┃"
-  echo "${CYAN}""┃ ${CYAN}4.${RESET}${WHITE} Instalar dependências do Termux ${CYAN}""┃"
-  echo "${CYAN}""┃ ${CYAN}5.${RESET}${WHITE} Comprar o arquivo do bot        ${CYAN}""┃"
-  echo "${CYAN}""┃ ${CYAN}0.${RESET}${WHITE} Sair                            ${CYAN}""┃"
-  echo "${CYAN}""╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯"
-  echo  "${RESET}"
+  echo -e "${CYAN}┃ ${CYAN}1.${RESET}${WHITE} Conectar com número (via código)${CYAN}┃"
+  echo -e "${CYAN}┃ ${CYAN}2.${RESET}${WHITE} Conectar via QR Code            ${CYAN}┃"
+  echo -e "${CYAN}┃ ${CYAN}3.${RESET}${WHITE} Reiniciar automático            ${CYAN}┃"
+  echo -e "${CYAN}┃ ${CYAN}4.${RESET}${WHITE} Instalar dependências do Termux ${CYAN}┃"
+  echo -e "${CYAN}┃ ${CYAN}5.${RESET}${WHITE} Comprar o arquivo do bot        ${CYAN}┃"
+  echo -e "${CYAN}┃ ${CYAN}0.${RESET}${WHITE} Sair                            ${CYAN}┃"
+  echo "╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯"
+  echo -e "${RESET}"
 }
 
 while true; do
