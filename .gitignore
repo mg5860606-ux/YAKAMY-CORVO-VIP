@@ -6,13 +6,26 @@ corvo_dados/.update_backup/
 session/
 *.log
 
-
 # 📦 Dependências
 node_modules/
 
 # 🧹 Temporários
 temp_videos/
+cache/
 temp/
 tmp/
 *.tmp
-node_modules
+*.bkp
+*.bat
+
+# 📁 Pastas de instalação local
+local_packages/
+sdk-node-apis-efi/
+
+# 📁 Pastas de conteúdo adulto (não sobe pro git)
+corvo+18/
+
+# 📁 Arquivos de sistema/backup
+ARQUIVES/
+INFON/
+"DADOS DO corvo"/
