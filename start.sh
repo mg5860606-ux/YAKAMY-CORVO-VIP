@@ -18,12 +18,10 @@ print_msg() {
 
 painel_tokito() {
   clear
-  echo -e "${CYAN}"
-  echo "╔═══════════════════════════════════════════════════╗"
-  echo "║      ${CYAN}🌫️ BOT 𝒀𝑨𝑲𝑨𝑴𝒀 — © ⏤͟͟͞͞𝒀𝑨𝑲𝑨𝑴𝒀  🌫️${CYAN}           ║"
-  echo "║           \"A sua bondade é a única.\"     ║"
-  echo "╚═══════════════════════════════════════════════════╝"
-  echo -e "${RESET}"
+  print_msg "$CYAN" "╔═══════════════════════════════════════════════════╗"
+  print_msg "$CYAN" "║      🌫️ BOT 𝒀𝑨𝑲𝑨𝑴𝒀 — © ⏤͟͟͞͞𝒀𝑨𝑲𝑨𝑴𝒀  🌫️           ║"
+  print_msg "$CYAN" "║           \"A sua bondade é a única.\"     ║"
+  print_msg "$CYAN" "╚═══════════════════════════════════════════════════╝"
 }
 
 instalar_dependencias() {
