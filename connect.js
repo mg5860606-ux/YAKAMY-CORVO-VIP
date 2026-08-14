@@ -10,6 +10,15 @@
  *  📦 Repositório: github.com/mg5860606-ux/YAKAMY-CORVO-VIP
  * ============================================================================
  */
+
+// 🐛 FIX 2026-08-14: Polyfill do globalThis.crypto para Baileys em hospedagens (VexHost/Pterodactyl/Node 18/20/21)
+const _nodeCrypto = require("crypto");
+if (!globalThis.crypto) {
+  globalThis.crypto = _nodeCrypto.webcrypto || _nodeCrypto;
+}
+if (globalThis.crypto && !globalThis.crypto.subtle && _nodeCrypto.webcrypto?.subtle) {
+  globalThis.crypto.subtle = _nodeCrypto.webcrypto.subtle;
+}
 const {
   default: makeWASocket,
   useMultiFileAuthState,
