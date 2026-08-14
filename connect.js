@@ -393,11 +393,18 @@ const BIO_REJEICAO_ESPERA_MS = 30 * 60 * 1000; // espera pós-rejeição por fre
 
 async function connectToWhatsApp() {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-  // Se for pareamento por código e as credenciais anteriores não concluíram o registro, limpa sessão corrompida
+  // Se for pareamento por código e a sessão salva estiver REALMENTE vazia/corrompida
+  // (sem me/account), limpa pra forçar pareamento novo.
+  // 🐛 FIX 2026-08-13: antes checava `credsData?.registered` — mas neste fork do
+  // Baileys o campo `registered` fica `false` até em sessões VÁLIDAS (o creds.json
+  // de produção tem registered:false e conecta normal). Isso fazia a sessão ser
+  // APAGADA em todo boot com `start.sh sim` no Termux → pareamento exigido toda
+  // vez / "Connection Closed". Agora só apaga se não houver sessão de verdade.
   if (usePairingCode && fs.existsSync(`${qrcode}/creds.json`)) {
     try {
       const credsData = JSON.parse(fs.readFileSync(`${qrcode}/creds.json`, "utf8"));
-      if (!credsData?.registered) {
+      const sessaoValida = credsData?.me?.id && credsData?.account?.accountSignatureKey;
+      if (!sessaoValida) {
         fs.rmSync(qrcode, { recursive: true, force: true });
       }
     } catch (e) {
@@ -407,7 +414,10 @@ async function connectToWhatsApp() {
   const { state, saveCreds } = await useMultiFileAuthState(qrcode);
   const { version, isLatest } = await fetchLatestBaileysVersion();
   async function getMessage(key) {
-    if (store) {
+    // 🐛 FIX 2026-08-13: `store` nunca é declarada no projeto (makeInMemoryStore é
+    // importada mas nunca instanciada). `if (store)` lançava ReferenceError em
+    // toda mensagem citada → erro ao responder/enviar. Guarda segura com typeof.
+    if (typeof store !== "undefined" && store) {
       try {
         const msg = await store.loadMessage(key.remoteJid, key.id);
         return msg?.message || undefined;
@@ -930,6 +940,11 @@ async function connectToWhatsApp() {
           if (shouldReconnect) {
             if (shouldReconnect == 401) {
               console.log(colors.red(datadb.ErrorBaileys401()));
+              // 🐛 FIX 2026-08-13: 401 = sessão deslogada/revogada pelo WhatsApp.
+              // Reconectar com a MESMA sessão morta só repete "Connection Closed"
+              // em loop infinito. Remove a sessão pra reconexão gerar QR/pareamento
+              // novo.
+              try { fs.rmSync(qrcode, { recursive: true, force: true }); } catch (e) {}
             } else if (shouldReconnect == 408) {
               console.log(colors.yellow(datadb.ErrorBaileys_408()));
             } else if (shouldReconnect == 411) {
