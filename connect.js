@@ -21,7 +21,7 @@ if (globalThis.crypto && !globalThis.crypto.subtle && _nodeCrypto.webcrypto?.sub
 }
 // 🐛 FIX 2026-08-14: Polyfill do File global para Node.js v18 (undici/fetch requer File no globalThis)
 if (!globalThis.File) {
-  try { globalThis.File = require("buffer").File; } catch (e) {}
+  try { globalThis.File = require("buffer").File; } catch (e) { }
 }
 const {
   default: makeWASocket,
@@ -166,7 +166,7 @@ let activeSock = null; // conexão Baileys ativa (para fechar antes de reconecta
 function DLT_FL(file) {
   try {
     fs.unlinkSync(file);
-  } catch (error) {}
+  } catch (error) { }
 }
 
 const logger = LoggerB.child({});
@@ -281,17 +281,17 @@ function matarPid(pid, motivo) {
 function dormirSync(ms) {
   try {
     Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
-  } catch (_) {}
+  } catch (_) { }
 }
 function abortarSeVivo(pid, motivo) {
   if (!isProcessAlive(pid)) return;
   console.log(
     colors.red(
       `❌ Não foi possível encerrar ${motivo} (PID ${pid}).\n` +
-        `   Rode 'npm start' num terminal COMO ADMINISTRADOR, ou mate manualmente:\n` +
-        (process.platform === "win32"
-          ? `      taskkill /F /T /PID ${pid}\n`
-          : `      kill -9 ${pid}\n`)
+      `   Rode 'npm start' num terminal COMO ADMINISTRADOR, ou mate manualmente:\n` +
+      (process.platform === "win32"
+        ? `      taskkill /F /T /PID ${pid}\n`
+        : `      kill -9 ${pid}\n`)
     )
   );
   process.exit(1);
@@ -323,7 +323,7 @@ function listarPidsConnectJs() {
           { encoding: "utf8", timeout: 15000, windowsHide: true }
         );
       } finally {
-        try { fs.unlinkSync(psFile); } catch (_) {}
+        try { fs.unlinkSync(psFile); } catch (_) { }
       }
     } else {
       out = execSync(`pgrep -f "connect\\.js"`, {
@@ -371,7 +371,7 @@ function acquireLock() {
         );
         process.exit(1);
       }
-    } catch (e) {}
+    } catch (e) { }
     // 3) Varredura extra: qualquer outro processo node rodando connect.js
     const outros = listarPidsConnectJs().filter(
       (p) => p !== process.pid && p !== oldPid
@@ -390,7 +390,7 @@ function releaseLock() {
       const pid = parseInt(fs.readFileSync(LOCK_FILE, "utf8"), 10);
       if (pid === process.pid) fs.unlinkSync(LOCK_FILE);
     }
-  } catch (e) {}
+  } catch (e) { }
 }
 
 // ============================================================
@@ -411,7 +411,7 @@ async function connectToWhatsApp() {
   try {
     const vRes = await fetchLatestBaileysVersion();
     if (vRes?.version) version = vRes.version;
-  } catch (e) {}
+  } catch (e) { }
   async function getMessage(key) {
     // 🐛 FIX 2026-08-13: `store` nunca é declarada no projeto (makeInMemoryStore é
     // importada mas nunca instanciada). `if (store)` lançava ReferenceError em
@@ -429,41 +429,41 @@ async function connectToWhatsApp() {
   }
 
   const corvo = makeWASocket({
-  version: [2, 3000, 1044409164],
-  logger,
-  emitOwnEvents: true,
-  fireInitQueries: true,
-  generateHighQualityLinkPreview: true,
-  syncFullHistory: false,
-  markOnlineOnConnect: true,
-  connectTimeoutMs: 60000,
-  qrTimeout: 180000,
-  keepAliveIntervalMs: 10000,
-  defaultQueryTimeoutMs: 0,
-  msgRetryCounterCache,
-  printQRInTerminal: !usePairingCode,
-  auth: state,
-  browser: ["Ubuntu", "Edge", "110.0.1587.56"],
-  generateHighQualityLinkPreview: true,
-  patchMessageBeforeSending: (message) => {
-    const requiresPatch = !!message?.interactiveMessage;
-    if (requiresPatch) {
-      message = {
-        viewOnceMessageV2Extension: {
-          message: {
-            messageContextInfo: {
-              deviceListMetadataVersion: 2,
-              deviceListMetadata: {},
+    version: [2, 3000, 1044409164],
+    logger,
+    emitOwnEvents: true,
+    fireInitQueries: true,
+    generateHighQualityLinkPreview: true,
+    syncFullHistory: false,
+    markOnlineOnConnect: true,
+    connectTimeoutMs: 60000,
+    qrTimeout: 180000,
+    keepAliveIntervalMs: 10000,
+    defaultQueryTimeoutMs: 0,
+    msgRetryCounterCache,
+    printQRInTerminal: !usePairingCode,
+    auth: state,
+    browser: ["Ubuntu", "Edge", "110.0.1587.56"],
+    generateHighQualityLinkPreview: true,
+    patchMessageBeforeSending: (message) => {
+      const requiresPatch = !!message?.interactiveMessage;
+      if (requiresPatch) {
+        message = {
+          viewOnceMessageV2Extension: {
+            message: {
+              messageContextInfo: {
+                deviceListMetadataVersion: 2,
+                deviceListMetadata: {},
+              },
+              ...message,
             },
-            ...message,
           },
-        },
-      };
-    }
-    return message;
-  },
-  getMessage,
-});
+        };
+      }
+      return message;
+    },
+    getMessage,
+  });
   const tokito = corvo;
   activeSock = corvo; // registra o socket ativo para o watchFile poder fechá-lo antes de reconectar
   // Strip forwarding marks from outgoing messages to avoid "encaminhada" badge
@@ -478,14 +478,14 @@ async function connectToWhatsApp() {
         const v = obj[k];
         if (v && typeof v === 'object') stripForwarding(v);
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   const _origSendMessage = tokito.sendMessage.bind(tokito);
   tokito.sendMessage = async (jid, message, options) => {
     try {
       stripForwarding(message);
-    } catch (e) {}
+    } catch (e) { }
     return _origSendMessage(jid, message, options);
   };
   if (usePairingCode && !tokito.authState.creds.registered) {
@@ -499,6 +499,24 @@ async function connectToWhatsApp() {
       `${colors.cyan("\n. Use seu número de telefone. Exemplo: 5511555555555:\n")}`
     );
     let numerosColetados = collectNumbers(phoneNumber);
+
+    // 🐛 FIX Termux/VPS: Aguarda o WebSocket do Baileys estar totalmente ABERTO (readyState === 1)
+    // No PC (Windows) a conexão é instantânea (~50ms), mas no Termux e VPS a latência exige 500ms~1500ms.
+    if (!tokito.ws || tokito.ws.readyState !== 1) {
+      await new Promise((resolve) => {
+        const interval = setInterval(() => {
+          if (tokito.ws && tokito.ws.readyState === 1) {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 200);
+        setTimeout(() => {
+          clearInterval(interval);
+          resolve();
+        }, 15000);
+      });
+    }
+
     const code = await tokito.requestPairingCode(numerosColetados);
     console.log(
       `\n${colors.magenta("Aqui está o código de pareamento:")} ${colors.cyan(code)}\n–\n${colors.yellow("• Vá até o whatsapp > Clique nos 3 pontinhos > Dispositivos conectados > Conectar via código > Cole o codigo la e aguarde.")}`
@@ -933,7 +951,7 @@ async function connectToWhatsApp() {
               // Reconectar com a MESMA sessão morta só repete "Connection Closed"
               // em loop infinito. Remove a sessão pra reconexão gerar QR/pareamento
               // novo.
-              try { fs.rmSync(qrcode, { recursive: true, force: true }); } catch (e) {}
+              try { fs.rmSync(qrcode, { recursive: true, force: true }); } catch (e) { }
             } else if (shouldReconnect == 408) {
               console.log(colors.yellow(datadb.ErrorBaileys_408()));
             } else if (shouldReconnect == 411) {
@@ -1138,7 +1156,7 @@ ${moldura}
 
       const connectToWhatsApp = require("./corvo.js");
       connectToWhatsApp(upsert, corvo, qrcode)
-        .then(() => {})
+        .then(() => { })
         .catch((error) => {
           console.log("Erro no Bot:", String(error));
         });
@@ -1154,7 +1172,7 @@ ${moldura}
 
         if (groupId && participant) {
           let texto = "";
-          
+
           if (newTag) {
             // Se o usuário colocou uma tag nova
             texto = `🏷️ *NOVA TAG DEFINIDA*\n\nO membro @${participant.split("@")[0]} definiu a sua tag no grupo para: *${newTag}*`;
@@ -1173,7 +1191,7 @@ ${moldura}
         console.log("Erro no evento de tag do grupo:", e);
       }
     }
-    
+
 
 
     if (events["creds.update"]) {
