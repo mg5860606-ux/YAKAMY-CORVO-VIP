@@ -406,33 +406,8 @@ const BIO_REJEICAO_ESPERA_MS = 30 * 60 * 1000; // espera pós-rejeição por fre
 
 async function connectToWhatsApp() {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-  // Se for pareamento por código e a sessão salva estiver REALMENTE vazia/corrompida
-  // (sem me/account), limpa pra forçar pareamento novo.
-  // 🐛 FIX 2026-08-13: antes checava `credsData?.registered` — mas neste fork do
-  // Baileys o campo `registered` fica `false` até em sessões VÁLIDAS (o creds.json
-  // de produção tem registered:false e conecta normal). Isso fazia a sessão ser
-  // APAGADA em todo boot com `start.sh sim` no Termux → pareamento exigido toda
-  // vez / "Connection Closed". Agora só apaga se não houver sessão de verdade.
-  if (usePairingCode && fs.existsSync(`${qrcode}/creds.json`)) {
-    try {
-      const credsData = JSON.parse(fs.readFileSync(`${qrcode}/creds.json`, "utf8"));
-      const sessaoValida = credsData?.me?.id && credsData?.account?.accountSignatureKey;
-      if (!sessaoValida) {
-        fs.rmSync(qrcode, { recursive: true, force: true });
-      }
-    } catch (e) {
-      try { fs.rmSync(qrcode, { recursive: true, force: true }); } catch (err) {}
-    }
-  }
   const { state, saveCreds } = await useMultiFileAuthState(qrcode);
-  let version;
-  try {
-    const vRes = await fetchLatestBaileysVersion();
-    version = vRes.version;
-  } catch (e) {
-    version = [2, 3000, 1017554025]; // fallback compatível
-    console.log(colors.yellow("[connect] fetchLatestBaileysVersion falhou, usando versão de fallback: " + version.join(".")));
-  }
+  const { version, isLatest } = await fetchLatestBaileysVersion();
   async function getMessage(key) {
     // 🐛 FIX 2026-08-13: `store` nunca é declarada no projeto (makeInMemoryStore é
     // importada mas nunca instanciada). `if (store)` lançava ReferenceError em
