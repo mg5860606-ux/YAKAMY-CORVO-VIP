@@ -9,8 +9,14 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execFile } = require('child_process');
-const ffmpegPath = require('ffmpeg-static');
+function getFfmpegPath() {
+  try {
+    const p = require('ffmpeg-static');
+    if (p && typeof p === 'string' && fs.existsSync(p)) return p;
+  } catch (e) {}
+  return 'ffmpeg';
+}
+const ffmpegPath = getFfmpegPath();
 
 const DIR_DOWNLOADS = path.resolve(__dirname, '..', 'data', 'downloads');
 

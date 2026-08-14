@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 🛠️ 𝒀𝑨𝑲𝑨𝑴𝒀 - FERRAMENTAS DO AGENTE (function calling)
  * A IA usa estas ferramentas quando precisa de informação da internet:
  * busca web, imagens, GitHub e Wikipedia.
@@ -10,9 +10,14 @@ const cheerio = require('cheerio');
 const { exec, spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
-const youtubedl = require('youtube-dl-exec');
-const ffmpegPath = require('ffmpeg-static');
+function getFfmpegPath() {
+  try {
+    const p = require('ffmpeg-static');
+    if (p && typeof p === 'string' && fs.existsSync(p)) return p;
+  } catch (e) {}
+  return 'ffmpeg';
+}
+const ffmpegPath = getFfmpegPath();
 const lembretes = require('../lembretes');
 const tarefas = require('./ia_tarefas');
 const monitorPrecos = require('./ia_monitor_precos');

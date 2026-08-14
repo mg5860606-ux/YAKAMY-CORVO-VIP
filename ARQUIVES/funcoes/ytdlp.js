@@ -9,10 +9,14 @@
  *  - busca por nome (ex: "midnight")  → ytsearch1
  *  - link direto do YouTube           → usa a URL como está
  */
-const fs = require('fs');
-const path = require('path');
-const youtubedl = require('youtube-dl-exec');
-const ffmpegPath = require('ffmpeg-static');
+function getFfmpegPath() {
+  try {
+    const p = require('ffmpeg-static');
+    if (p && typeof p === 'string' && fs.existsSync(p)) return p;
+  } catch (e) {}
+  return 'ffmpeg';
+}
+const ffmpegPath = getFfmpegPath();
 
 const DIR_DOWNLOADS = path.join(__dirname, '..', '..', 'corvo_dados', 'downloads');
 

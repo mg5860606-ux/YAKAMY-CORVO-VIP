@@ -257,10 +257,18 @@ function acharBlocoAudio(data) {
   return null;
 }
 
-/** Converte PCM l16 cru (raw) para MP3 via ffmpeg-static (já instalado). */
+function getFfmpegPath() {
+  try {
+    const p = require('ffmpeg-static');
+    if (p && typeof p === 'string' && fs.existsSync(p)) return p;
+  } catch (e) {}
+  return 'ffmpeg';
+}
+
+/** Converte PCM l16 cru (raw) para MP3 via ffmpeg (estático ou do sistema). */
 function pcmL16ParaMp3(pcm, rate, channels) {
   return new Promise((resolve, reject) => {
-    const ffmpegPath = require('ffmpeg-static');
+    const ffmpegPath = getFfmpegPath();
     const tmpIn = path.join(os.tmpdir(), `corvo_pcm_${Date.now()}_${Math.random().toString(36).slice(2)}.raw`);
     const tmpOut = path.join(os.tmpdir(), `corvo_mp3_${Date.now()}_${Math.random().toString(36).slice(2)}.mp3`);
     try { fs.writeFileSync(tmpIn, pcm); } catch (e) { return reject(e); }
@@ -426,7 +434,7 @@ async function enviarAudios(ctx, audios = [], opts = {}) {
  */
 function converterAudioParaMp3(buffer, mimeType = '') {
   return new Promise((resolve, reject) => {
-    const ffmpegPath = require('ffmpeg-static');
+    const ffmpegPath = getFfmpegPath();
     const tmpIn = path.join(os.tmpdir(), `corvo_audio_in_${Date.now()}_${Math.random().toString(36).slice(2)}.${mimeType.includes('ogg') ? 'ogg' : mimeType.includes('wav') ? 'wav' : 'm4a'}`);
     const tmpOut = path.join(os.tmpdir(), `corvo_audio_out_${Date.now()}_${Math.random().toString(36).slice(2)}.mp3`);
     try { fs.writeFileSync(tmpIn, buffer); } catch (e) { return reject(e); }
@@ -452,7 +460,7 @@ function converterAudioParaMp3(buffer, mimeType = '') {
  */
 function converterParaOggOpus(buffer) {
   return new Promise((resolve, reject) => {
-    const ffmpegPath = require('ffmpeg-static');
+    const ffmpegPath = getFfmpegPath();
     const tmpIn = path.join(os.tmpdir(), `corvo_ogg_in_${Date.now()}_${Math.random().toString(36).slice(2)}.mp3`);
     const tmpOut = path.join(os.tmpdir(), `corvo_ogg_out_${Date.now()}_${Math.random().toString(36).slice(2)}.ogg`);
     try { fs.writeFileSync(tmpIn, buffer); } catch (e) { return reject(e); }
