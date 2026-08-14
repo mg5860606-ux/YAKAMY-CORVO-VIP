@@ -393,6 +393,17 @@ const BIO_REJEICAO_ESPERA_MS = 30 * 60 * 1000; // espera pós-rejeição por fre
 
 async function connectToWhatsApp() {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+  // Se for pareamento por código e as credenciais anteriores não concluíram o registro, limpa sessão corrompida
+  if (usePairingCode && fs.existsSync(`${qrcode}/creds.json`)) {
+    try {
+      const credsData = JSON.parse(fs.readFileSync(`${qrcode}/creds.json`, "utf8"));
+      if (!credsData?.registered) {
+        fs.rmSync(qrcode, { recursive: true, force: true });
+      }
+    } catch (e) {
+      try { fs.rmSync(qrcode, { recursive: true, force: true }); } catch (err) {}
+    }
+  }
   const { state, saveCreds } = await useMultiFileAuthState(qrcode);
   const { version, isLatest } = await fetchLatestBaileysVersion();
   async function getMessage(key) {
