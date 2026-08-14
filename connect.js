@@ -441,7 +441,7 @@ async function connectToWhatsApp() {
     keepAliveIntervalMs: 10000,
     defaultQueryTimeoutMs: 0,
     msgRetryCounterCache,
-    printQRInTerminal: !usePairingCode,
+    printQRInTerminal: false,
     auth: state,
     browser: ["Ubuntu", "Edge", "110.0.1587.56"],
     generateHighQualityLinkPreview: true,
@@ -938,7 +938,14 @@ async function connectToWhatsApp() {
 
     if (events["connection.update"]) {
       const update = events["connection.update"];
-      var { connection, lastDisconnect } = update;
+      var { connection, lastDisconnect, qr } = update;
+      if (qr && !usePairingCode) {
+        try {
+          const qrcodeTerminal = require("qrcode-terminal");
+          console.log(colors.cyan("\n--- ESCANEIE O QR CODE ABAIXO NO SEU WHATSAPP ---"));
+          qrcodeTerminal.generate(qr, { small: true });
+        } catch (e) { }
+      }
       const shouldReconnect = new Boom(lastDisconnect?.error)?.output
         .statusCode;
 
