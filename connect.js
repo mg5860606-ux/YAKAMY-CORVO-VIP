@@ -429,7 +429,7 @@ async function connectToWhatsApp() {
   }
 
   const corvo = makeWASocket({
-    version: [2, 3000, 1044409164],
+    version,
     logger,
     emitOwnEvents: true,
     fireInitQueries: true,
