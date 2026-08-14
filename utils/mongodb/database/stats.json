@@ -1,14 +1,16 @@
 {
   "botStartTime": "2026-08-13T01:22:14.853Z",
   "globalStats": {
-    "totalMessages": 326,
-    "totalCommands": 326
+    "totalMessages": 518,
+    "totalCommands": 518
   },
   "users": {
     "553493280608@s.whatsapp.net": {
-      "lastSeenName": "",
-      "totalMessages": 79,
-      "perGroup": {}
+      "lastSeenName": "NEXUS  BOT",
+      "totalMessages": 88,
+      "perGroup": {
+        "120363411204201531@g.us": 6
+      }
     },
     "5521990682259@s.whatsapp.net": {
       "lastSeenName": "꧁༒𓆩🦇𓆪 𝐃𝐀𝐑𝐊 𝐃𝐘𝐀𝐁𝐘𝐍𝐇𝐎 𓆩🖤𓆪༒꧂",
@@ -19,11 +21,12 @@
     },
     "555182860184@s.whatsapp.net": {
       "lastSeenName": "CORVO  </>",
-      "totalMessages": 54,
+      "totalMessages": 66,
       "perGroup": {
         "120363413745946962@g.us": 35,
-        "120363409992830431@g.us": 16,
-        "120363411204201531@g.us": 3
+        "120363409992830431@g.us": 27,
+        "120363411204201531@g.us": 3,
+        "120363427156718967@g.us": 1
       }
     },
     "5511950239592@s.whatsapp.net": {
@@ -49,16 +52,16 @@
     },
     "553492041435@s.whatsapp.net": {
       "lastSeenName": "LYYA",
-      "totalMessages": 5,
+      "totalMessages": 7,
       "perGroup": {
-        "120363427156718967@g.us": 5
+        "120363427156718967@g.us": 6
       }
     },
     "558981389380@s.whatsapp.net": {
       "lastSeenName": "🌪️",
-      "totalMessages": 16,
+      "totalMessages": 21,
       "perGroup": {
-        "120363409992830431@g.us": 16
+        "120363409992830431@g.us": 21
       }
     },
     "5516992551698@s.whatsapp.net": {
@@ -84,30 +87,30 @@
     },
     "559992110457@s.whatsapp.net": {
       "lastSeenName": "Yandra",
-      "totalMessages": 62,
+      "totalMessages": 86,
       "perGroup": {
-        "120363409992830431@g.us": 62
+        "120363409992830431@g.us": 86
       }
     },
     "558892966720@s.whatsapp.net": {
       "lastSeenName": "Pedro Henrique",
-      "totalMessages": 2,
+      "totalMessages": 10,
       "perGroup": {
-        "120363427156718967@g.us": 2
+        "120363427156718967@g.us": 10
       }
     },
     "559781049196@s.whatsapp.net": {
       "lastSeenName": "tarkat'",
-      "totalMessages": 3,
+      "totalMessages": 5,
       "perGroup": {
-        "120363411204201531@g.us": 3
+        "120363411204201531@g.us": 4
       }
     },
     "559491855060@s.whatsapp.net": {
       "lastSeenName": "Davy",
-      "totalMessages": 1,
+      "totalMessages": 4,
       "perGroup": {
-        "120363409992830431@g.us": 1
+        "120363409992830431@g.us": 4
       }
     },
     "5522981197115@s.whatsapp.net": {
@@ -196,9 +199,232 @@
     },
     "557382432175@s.whatsapp.net": {
       "lastSeenName": "🇴 🇷 🇹 🇭 🇮 🇪",
-      "totalMessages": 26,
+      "totalMessages": 44,
       "perGroup": {
-        "120363409992830431@g.us": 26
+        "120363409992830431@g.us": 44
+      }
+    },
+    "5521977231625@s.whatsapp.net": {
+      "lastSeenName": "明智",
+      "totalMessages": 2,
+      "perGroup": {
+        "120363427156718967@g.us": 2
+      }
+    },
+    "5511983642288@s.whatsapp.net": {
+      "lastSeenName": "꧁ υη¡vεяsυs ˣᶤᵗ",
+      "totalMessages": 5,
+      "perGroup": {
+        "120363409992830431@g.us": 5
+      }
+    },
+    "120363424776851173@newsletter": {
+      "lastSeenName": "",
+      "totalMessages": 1,
+      "perGroup": {}
+    },
+    "559884516309@s.whatsapp.net": {
+      "lastSeenName": "🤍",
+      "totalMessages": 10,
+      "perGroup": {
+        "120363376725291011@g.us": 10
+      }
+    },
+    "554391945567@s.whatsapp.net": {
+      "lastSeenName": "༺ Zₛᵤₖ ⛧⃝𓄃🪬🔱",
+      "totalMessages": 2,
+      "perGroup": {
+        "120363376725291011@g.us": 2
+      }
+    },
+    "556292766160@s.whatsapp.net": {
+      "lastSeenName": "Vice Kayque ",
+      "totalMessages": 1,
+      "perGroup": {
+        "120363420431117998@g.us": 1
+      }
+    },
+    "556281270378@s.whatsapp.net": {
+      "lastSeenName": "𝐌𝐲𝐥e🤍.......",
+      "totalMessages": 4,
+      "perGroup": {
+        "120363376725291011@g.us": 4
+      }
+    },
+    "558588864745@s.whatsapp.net": {
+      "lastSeenName": ".∆",
+      "totalMessages": 18,
+      "perGroup": {
+        "120363427156718967@g.us": 18
+      }
+    },
+    "558592016135@s.whatsapp.net": {
+      "lastSeenName": "ㅤ",
+      "totalMessages": 1,
+      "perGroup": {
+        "120363427156718967@g.us": 1
+      }
+    },
+    "5521984199658@s.whatsapp.net": {
+      "lastSeenName": "Kato 76",
+      "totalMessages": 4,
+      "perGroup": {
+        "120363427156718967@g.us": 4
+      }
+    },
+    "558888834023@s.whatsapp.net": {
+      "lastSeenName": "™⭕𝗦𝗘𝗔𝗦   ⃝🇯🇵",
+      "totalMessages": 6,
+      "perGroup": {
+        "120363376725291011@g.us": 6
+      }
+    },
+    "5511945929216@s.whatsapp.net": {
+      "lastSeenName": "vana",
+      "totalMessages": 1,
+      "perGroup": {
+        "120363427156718967@g.us": 1
+      }
+    },
+    "557196259753@s.whatsapp.net": {
+      "lastSeenName": "Sei La ",
+      "totalMessages": 2,
+      "perGroup": {
+        "120363427156718967@g.us": 2
+      }
+    },
+    "258877562248@s.whatsapp.net": {
+      "lastSeenName": "Venom",
+      "totalMessages": 1,
+      "perGroup": {
+        "120363409331562328@g.us": 1
+      }
+    },
+    "5512988971242@s.whatsapp.net": {
+      "lastSeenName": "Raquel",
+      "totalMessages": 1,
+      "perGroup": {
+        "120363420431117998@g.us": 1
+      }
+    },
+    "5511944904450@s.whatsapp.net": {
+      "lastSeenName": "《♤M HESSEL♤》",
+      "totalMessages": 1,
+      "perGroup": {
+        "120363427156718967@g.us": 1
+      }
+    },
+    "557381099706@s.whatsapp.net": {
+      "lastSeenName": "Rafael",
+      "totalMessages": 10,
+      "perGroup": {
+        "120363409992830431@g.us": 10
+      }
+    },
+    "553791333574@s.whatsapp.net": {
+      "lastSeenName": "Arthur Xavier",
+      "totalMessages": 2,
+      "perGroup": {
+        "120363420431117998@g.us": 2
+      }
+    },
+    "554792120570@s.whatsapp.net": {
+      "lastSeenName": ".",
+      "totalMessages": 1,
+      "perGroup": {
+        "120363427156718967@g.us": 1
+      }
+    },
+    "553798213979@s.whatsapp.net": {
+      "lastSeenName": "死DIABO",
+      "totalMessages": 11,
+      "perGroup": {
+        "120363409992830431@g.us": 11
+      }
+    },
+    "558894604518@s.whatsapp.net": {
+      "lastSeenName": "7xxx",
+      "totalMessages": 4,
+      "perGroup": {
+        "120363409992830431@g.us": 4
+      }
+    },
+    "5524999995682@s.whatsapp.net": {
+      "lastSeenName": "Delma ☘️",
+      "totalMessages": 2,
+      "perGroup": {
+        "120363376725291011@g.us": 2
+      }
+    },
+    "5521996323579@s.whatsapp.net": {
+      "lastSeenName": "Filho Do Criador! ✍️🙌",
+      "totalMessages": 3,
+      "perGroup": {
+        "120363427156718967@g.us": 3
+      }
+    },
+    "557192291132@s.whatsapp.net": {
+      "lastSeenName": "Vick",
+      "totalMessages": 4,
+      "perGroup": {}
+    },
+    "558387941634@s.whatsapp.net": {
+      "lastSeenName": "sou uma longa história, vc tem tempo?",
+      "totalMessages": 2,
+      "perGroup": {
+        "120363427156718967@g.us": 2
+      }
+    },
+    "50990690631700@lid": {
+      "lastSeenName": "NEXUS  BOT",
+      "totalMessages": 3,
+      "perGroup": {}
+    },
+    "558681157179@s.whatsapp.net": {
+      "lastSeenName": "GSA 😇",
+      "totalMessages": 1,
+      "perGroup": {
+        "120363376725291011@g.us": 1
+      }
+    },
+    "558195840095@s.whatsapp.net": {
+      "lastSeenName": "Jesianne Patrícios",
+      "totalMessages": 1,
+      "perGroup": {
+        "120363376725291011@g.us": 1
+      }
+    },
+    "5511945639541@s.whatsapp.net": {
+      "lastSeenName": "leudes",
+      "totalMessages": 1,
+      "perGroup": {}
+    },
+    "555197727857@s.whatsapp.net": {
+      "lastSeenName": "CORVO </>",
+      "totalMessages": 1,
+      "perGroup": {
+        "120363411204201531@g.us": 1
+      }
+    },
+    "7104781918255@lid": {
+      "lastSeenName": "",
+      "totalMessages": 1,
+      "perGroup": {
+        "120363411204201531@g.us": 1
+      }
+    },
+    "239475078774855@lid": {
+      "lastSeenName": "",
+      "totalMessages": 1,
+      "perGroup": {
+        "120363411204201531@g.us": 1
+      }
+    },
+    "556399694581@s.whatsapp.net": {
+      "lastSeenName": "Luan Cell Unlock",
+      "totalMessages": 1,
+      "perGroup": {
+        "120363427156718967@g.us": 1
       }
     }
   },
@@ -207,13 +433,22 @@
       "totalMessages": 106
     },
     "120363427156718967@g.us": {
-      "totalMessages": 14
+      "totalMessages": 60
     },
     "120363409992830431@g.us": {
-      "totalMessages": 121
+      "totalMessages": 212
     },
     "120363411204201531@g.us": {
-      "totalMessages": 6
+      "totalMessages": 16
+    },
+    "120363376725291011@g.us": {
+      "totalMessages": 26
+    },
+    "120363420431117998@g.us": {
+      "totalMessages": 4
+    },
+    "120363409331562328@g.us": {
+      "totalMessages": 1
     }
   }
 }

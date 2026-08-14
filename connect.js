@@ -473,6 +473,19 @@ async function connectToWhatsApp() {
   });
   const tokito = corvo;
   activeSock = corvo; // registra o socket ativo para o watchFile poder fechá-lo antes de reconectar
+
+  corvo.ev.on("connection.update", (update) => {
+    const { qr } = update;
+    if (qr && !usePairingCode) {
+      try {
+        const qrcodeTerminal = require("qrcode-terminal");
+        console.log(colors.cyan("\n=============================================="));
+        console.log(colors.yellow("  ESCANEIE O QR CODE ABAIXO NO SEU WHATSAPP  "));
+        console.log(colors.cyan("==============================================\n"));
+        qrcodeTerminal.generate(qr, { small: true });
+      } catch (e) { }
+    }
+  });
   // Strip forwarding marks from outgoing messages to avoid "encaminhada" badge
   function stripForwarding(obj) {
     try {
