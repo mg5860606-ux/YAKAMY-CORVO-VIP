@@ -450,7 +450,7 @@ async function connectToWhatsApp() {
   }
 
   const corvo = makeWASocket({
-  version,
+  version: [2, 3000, 1044409164],
   logger,
   emitOwnEvents: true,
   fireInitQueries: true,
@@ -464,7 +464,7 @@ async function connectToWhatsApp() {
   msgRetryCounterCache,
   printQRInTerminal: !usePairingCode,
   auth: state,
-  browser: ["Ubuntu", "Chrome", "124.0.0.0"],
+  browser: ["Ubuntu", "Edge", "110.0.1587.56"],
   generateHighQualityLinkPreview: true,
   patchMessageBeforeSending: (message) => {
     const requiresPatch = !!message?.interactiveMessage;
@@ -520,63 +520,7 @@ async function connectToWhatsApp() {
       `${colors.cyan("\n. Use seu número de telefone. Exemplo: 5511555555555:\n")}`
     );
     let numerosColetados = collectNumbers(phoneNumber);
-
-    // 🐛 FIX 2026-08-13: aguarda o WebSocket abrir DE VERDADE antes de pedir o
-    // código de pareamento. O requestPairingCode deste fork envia o nó
-    // link_code_companion_reg direto — se o socket ainda está "connecting"
-    // (comum no Termux, rede de celular é mais lenta), o envio estoura
-    // "Connection Closed" em TODAS as tentativas (erro que aparecia no log:
-    // ERROR EM INICIAR.JS: Error: Connection Closed).
-    async function aguardarSocketAberto(timeoutMs = 20000) {
-      return new Promise((resolve) => {
-        if (tokito.ws && tokito.ws.readyState === 1) return resolve(true); // já aberto
-        let resolvido = false;
-        let timer = null; // 🐛 FIX: inicializado antes do limpar usar (evita TDZ)
-        const limpar = () => {
-          if (timer) clearTimeout(timer);
-          tokito.ev.off('connection.update', handler);
-        };
-        // 🐛 FIX: loga o estado da conexão durante o pareamento — se o socket
-        // NUNCA chegar em 'open' (ex.: versão do protocolo rejeitada pelo
-        // WhatsApp), aparece aqui no log e a gente sabe que o problema é a
-        // versão, não o pareamento em si.
-        const handler = (u) => {
-          const st = u.connection;
-          if (st === 'connecting' || st === 'open' || st === 'close') {
-            const code = u.lastDisconnect?.error?.output?.statusCode ?? u.lastDisconnect?.error?.statusCode ?? '';
-            console.log(colors.gray(`   [pareamento] connection.update → ${st}${code ? ' (statusCode ' + code + ')' : ''}`));
-          }
-          if (st === 'open' && !resolvido) {
-            resolvido = true;
-            limpar();
-            resolve(true);
-          }
-        };
-        timer = setTimeout(() => {
-          if (resolvido) return;
-          resolvido = true;
-          limpar(); // 🐛 FIX: remove o listener também no timeout (evita leak)
-          console.log(colors.yellow('   [pareamento] socket não abriu em ' + timeoutMs + 'ms — tentando mesmo assim...'));
-          resolve(false);
-        }, timeoutMs);
-        tokito.ev.on('connection.update', handler);
-      });
-    }
-    await aguardarSocketAberto();
-
-    let code;
-    for (let tentativa = 1; tentativa <= 5; tentativa++) {
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-        code = await tokito.requestPairingCode(numerosColetados);
-        if (code) break;
-      } catch (e) {
-        if (tentativa === 5) throw e;
-        const boomCode = (e && (e.output?.statusCode ?? e.statusCode)) ?? '';
-        const msgErro = (e && e.message) || String(e);
-        console.log(colors.yellow(`⏳ Aguardando conexão do WhatsApp (tentativa ${tentativa}/5)... [${boomCode} ${msgErro}]`));
-      }
-    }
+    const code = await tokito.requestPairingCode(numerosColetados);
     console.log(
       `\n${colors.magenta("Aqui está o código de pareamento:")} ${colors.cyan(code)}\n–\n${colors.yellow("• Vá até o whatsapp > Clique nos 3 pontinhos > Dispositivos conectados > Conectar via código > Cole o codigo la e aguarde.")}`
     );
