@@ -19,6 +19,10 @@ if (!globalThis.crypto) {
 if (globalThis.crypto && !globalThis.crypto.subtle && _nodeCrypto.webcrypto?.subtle) {
   globalThis.crypto.subtle = _nodeCrypto.webcrypto.subtle;
 }
+// 🐛 FIX 2026-08-14: Polyfill do File global para Node.js v18 (undici/fetch requer File no globalThis)
+if (!globalThis.File) {
+  try { globalThis.File = require("buffer").File; } catch (e) {}
+}
 
 const { spawn } = require("child_process");
 const readline = require("readline");
