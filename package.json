@@ -4,7 +4,7 @@
     "@google/generative-ai": "^0.24.1",
     "@nechlophomeriaa/spotifydl": "^1.0.4",
     "@vitalets/google-translate-api": "^9.2.0",
-    "@whiskeysockets/baileys": "^6.7.24",
+    "@whiskeysockets/baileys": "npm:baileys-mod@6.8.5",
     "acrcloud": "^1.4.0",
     "adm-zip": "^0.5.18",
     "aki-api": "^6.0.0",

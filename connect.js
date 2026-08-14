@@ -1,28 +1,3 @@
-/*
- * ============================================================================
- *  🖤 𝒀𝑨𝑲𝑨𝑴𝒀 — CONEXÃO (BAILEYS)
- *  ----------------------------------------------------------------------------
- *  👑 Dono & Criador: DARK DYABYNHO
- *  💬 Telegram: @CORVO291
- *  🤖 Bot Telegram: t.me/corvo_div_bot
- *  🧠 IA: Irmã do DARK (cérebro do bot)
- *  💻 GitHub: github.com/mg5860606-ux
- *  📦 Repositório: github.com/mg5860606-ux/YAKAMY-CORVO-VIP
- * ============================================================================
- */
-
-// 🐛 FIX 2026-08-14: Polyfill do globalThis.crypto para Baileys em hospedagens (VexHost/Pterodactyl/Node 18/20/21)
-const _nodeCrypto = require("crypto");
-if (!globalThis.crypto) {
-  globalThis.crypto = _nodeCrypto.webcrypto || _nodeCrypto;
-}
-if (globalThis.crypto && !globalThis.crypto.subtle && _nodeCrypto.webcrypto?.subtle) {
-  globalThis.crypto.subtle = _nodeCrypto.webcrypto.subtle;
-}
-// 🐛 FIX 2026-08-14: Polyfill do File global para Node.js v18 (undici/fetch requer File no globalThis)
-if (!globalThis.File) {
-  try { globalThis.File = require("buffer").File; } catch (e) { }
-}
 const {
   default: makeWASocket,
   useMultiFileAuthState,
@@ -104,7 +79,6 @@ const {
   data,
   banner3,
   banner2,
-  banner4,
   LoggerB,
   fs,
   peth,
@@ -118,10 +92,7 @@ const {
   pushnames,
 } = require("./exports.js");
 
-// Global safety handlers & warning suppressions
-process.removeAllListeners("warning");
-process.env.NODE_NO_WARNINGS = "1";
-
+// Global safety handlers to prevent the process from exiting on unexpected async errors
 process.on("uncaughtException", (err) => {
   console.error("Uncaught exception:", err && err.stack ? err.stack : err);
 });
@@ -169,7 +140,7 @@ let activeSock = null; // conexão Baileys ativa (para fechar antes de reconecta
 function DLT_FL(file) {
   try {
     fs.unlinkSync(file);
-  } catch (error) { }
+  } catch (error) {}
 }
 
 const logger = LoggerB.child({});
@@ -182,7 +153,7 @@ try {
 }
 
 const datadb = require("./ARQUIVES/datadb.msg.js");
-var qrcode = "./corvo_dados/qrcode";
+var qrcode = "./ram/qrcode";
 const usePairingCode = process.argv.includes("sim");
 if (!usePairingCode && !fs.existsSync(`${qrcode}/creds.json`))
   console.log(
@@ -256,7 +227,7 @@ const msgRetryCounterCache = new NodeCache();
 // (2 conexões com a mesma credencial derrubam as duas no WhatsApp.)
 // execSync já vem do require('./exports.js') no topo.
 // ============================================================
-const LOCK_FILE = __dirname + "/corvo_dados/bot.lock";
+const LOCK_FILE = __dirname + "/ram/bot.lock";
 function isProcessAlive(pid) {
   try {
     process.kill(pid, 0);
@@ -284,17 +255,17 @@ function matarPid(pid, motivo) {
 function dormirSync(ms) {
   try {
     Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
-  } catch (_) { }
+  } catch (_) {}
 }
 function abortarSeVivo(pid, motivo) {
   if (!isProcessAlive(pid)) return;
   console.log(
     colors.red(
       `❌ Não foi possível encerrar ${motivo} (PID ${pid}).\n` +
-      `   Rode 'npm start' num terminal COMO ADMINISTRADOR, ou mate manualmente:\n` +
-      (process.platform === "win32"
-        ? `      taskkill /F /T /PID ${pid}\n`
-        : `      kill -9 ${pid}\n`)
+        `   Rode 'npm start' num terminal COMO ADMINISTRADOR, ou mate manualmente:\n` +
+        (process.platform === "win32"
+          ? `      taskkill /F /T /PID ${pid}\n`
+          : `      kill -9 ${pid}\n`)
     )
   );
   process.exit(1);
@@ -315,7 +286,7 @@ function listarPidsConnectJs() {
       // Espelha a varredura do restart.sh (via .ps1 temporário pra evitar
       // problemas de escape de aspas no cmd)
       const psFile =
-        __dirname + "/corvo_dados/_scan_connect_" + process.pid + ".ps1";
+        __dirname + "/ram/_scan_connect_" + process.pid + ".ps1";
       fs.writeFileSync(
         psFile,
         "Get-CimInstance Win32_Process -Filter \"Name='node.exe'\" | Where-Object { $_.CommandLine -match 'connect\\.js' } | Select-Object -ExpandProperty ProcessId\n"
@@ -326,13 +297,12 @@ function listarPidsConnectJs() {
           { encoding: "utf8", timeout: 15000, windowsHide: true }
         );
       } finally {
-        try { fs.unlinkSync(psFile); } catch (_) { }
+        try { fs.unlinkSync(psFile); } catch (_) {}
       }
     } else {
-      out = execSync(`pgrep -f "connect\\.js" 2>/dev/null`, {
+      out = execSync(`pgrep -f "connect\\.js"`, {
         encoding: "utf8",
         timeout: 15000,
-        stdio: ["ignore", "pipe", "ignore"],
       });
     }
     return out
@@ -375,7 +345,7 @@ function acquireLock() {
         );
         process.exit(1);
       }
-    } catch (e) { }
+    } catch (e) {}
     // 3) Varredura extra: qualquer outro processo node rodando connect.js
     const outros = listarPidsConnectJs().filter(
       (p) => p !== process.pid && p !== oldPid
@@ -394,7 +364,7 @@ function releaseLock() {
       const pid = parseInt(fs.readFileSync(LOCK_FILE, "utf8"), 10);
       if (pid === process.pid) fs.unlinkSync(LOCK_FILE);
     }
-  } catch (e) { }
+  } catch (e) {}
 }
 
 // ============================================================
@@ -411,19 +381,9 @@ const BIO_REJEICAO_ESPERA_MS = 30 * 60 * 1000; // espera pós-rejeição por fre
 async function connectToWhatsApp() {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
   const { state, saveCreds } = await useMultiFileAuthState(qrcode);
-  let version = [2, 3000, 1015901307];
-  try {
-    const vRes = await Promise.race([
-      fetchLatestBaileysVersion(),
-      new Promise((_, r) => setTimeout(() => r(new Error("timeout")), 3000))
-    ]);
-    if (vRes?.version) version = vRes.version;
-  } catch (e) { }
+  const { version, isLatest } = await fetchLatestBaileysVersion();
   async function getMessage(key) {
-    // 🐛 FIX 2026-08-13: `store` nunca é declarada no projeto (makeInMemoryStore é
-    // importada mas nunca instanciada). `if (store)` lançava ReferenceError em
-    // toda mensagem citada → erro ao responder/enviar. Guarda segura com typeof.
-    if (typeof store !== "undefined" && store) {
+    if (store) {
       try {
         const msg = await store.loadMessage(key.remoteJid, key.id);
         return msg?.message || undefined;
@@ -435,57 +395,44 @@ async function connectToWhatsApp() {
     return Promise.resolve({});
   }
 
-  const corvo = makeWASocket({
-    version,
-    logger,
-    emitOwnEvents: true,
-    fireInitQueries: true,
-    generateHighQualityLinkPreview: true,
-    syncFullHistory: false,
-    markOnlineOnConnect: true,
-    connectTimeoutMs: 60000,
-    qrTimeout: 180000,
-    keepAliveIntervalMs: 10000,
-    defaultQueryTimeoutMs: 0,
-    msgRetryCounterCache,
-    printQRInTerminal: false,
-    auth: state,
-    browser: Browsers.ubuntu("Chrome"),
-    generateHighQualityLinkPreview: true,
-    patchMessageBeforeSending: (message) => {
-      const requiresPatch = !!message?.interactiveMessage;
-      if (requiresPatch) {
-        message = {
-          viewOnceMessageV2Extension: {
-            message: {
-              messageContextInfo: {
-                deviceListMetadataVersion: 2,
-                deviceListMetadata: {},
-              },
-              ...message,
+  const ram = makeWASocket({
+  version: [2, 3000, 1044409164], // ← versão atual (sw.js client_revision)
+  logger,
+  emitOwnEvents: true,
+  fireInitQueries: true,
+  generateHighQualityLinkPreview: true,
+  syncFullHistory: false,
+  markOnlineOnConnect: true,
+  connectTimeoutMs: 60000,
+  qrTimeout: 180000,
+  keepAliveIntervalMs: 10000,
+  defaultQueryTimeoutMs: 0,
+  msgRetryCounterCache,
+  printQRInTerminal: !usePairingCode,
+  auth: state,
+  browser: ["Ubuntu", "Edge", "110.0.1587.56"],
+  generateHighQualityLinkPreview: true,
+  patchMessageBeforeSending: (message) => {
+    const requiresPatch = !!message?.interactiveMessage;
+    if (requiresPatch) {
+      message = {
+        viewOnceMessage: {
+          message: {
+            messageContextInfo: {
+              deviceListMetadataVersion: 2,
+              deviceListMetadata: {},
             },
+            ...message,
           },
-        };
-      }
-      return message;
-    },
-    getMessage,
-  });
-  const tokito = corvo;
-  activeSock = corvo; // registra o socket ativo para o watchFile poder fechá-lo antes de reconectar
-
-  corvo.ev.on("connection.update", (update) => {
-    const { qr } = update;
-    if (qr && !usePairingCode) {
-      try {
-        const qrcodeTerminal = require("qrcode-terminal");
-        console.log(colors.cyan("\n=============================================="));
-        console.log(colors.yellow("  ESCANEIE O QR CODE ABAIXO NO SEU WHATSAPP  "));
-        console.log(colors.cyan("==============================================\n"));
-        qrcodeTerminal.generate(qr, { small: true });
-      } catch (e) { }
+        },
+      };
     }
-  });
+    return message;
+  },
+  getMessage,
+});
+  const tokito = ram;
+  activeSock = ram; // registra o socket ativo para o watchFile poder fechá-lo antes de reconectar
   // Strip forwarding marks from outgoing messages to avoid "encaminhada" badge
   function stripForwarding(obj) {
     try {
@@ -498,14 +445,14 @@ async function connectToWhatsApp() {
         const v = obj[k];
         if (v && typeof v === 'object') stripForwarding(v);
       }
-    } catch (e) { }
+    } catch (e) {}
   }
 
   const _origSendMessage = tokito.sendMessage.bind(tokito);
   tokito.sendMessage = async (jid, message, options) => {
     try {
       stripForwarding(message);
-    } catch (e) { }
+    } catch (e) {}
     return _origSendMessage(jid, message, options);
   };
   if (usePairingCode && !tokito.authState.creds.registered) {
@@ -519,24 +466,6 @@ async function connectToWhatsApp() {
       `${colors.cyan("\n. Use seu número de telefone. Exemplo: 5511555555555:\n")}`
     );
     let numerosColetados = collectNumbers(phoneNumber);
-
-    // 🐛 FIX Termux/VPS: Aguarda o WebSocket do Baileys estar totalmente ABERTO (readyState === 1)
-    // No PC (Windows) a conexão é instantânea (~50ms), mas no Termux e VPS a latência exige 500ms~1500ms.
-    if (!tokito.ws || tokito.ws.readyState !== 1) {
-      await new Promise((resolve) => {
-        const interval = setInterval(() => {
-          if (tokito.ws && tokito.ws.readyState === 1) {
-            clearInterval(interval);
-            resolve();
-          }
-        }, 200);
-        setTimeout(() => {
-          clearInterval(interval);
-          resolve();
-        }, 15000);
-      });
-    }
-
     const code = await tokito.requestPairingCode(numerosColetados);
     console.log(
       `\n${colors.magenta("Aqui está o código de pareamento:")} ${colors.cyan(code)}\n–\n${colors.yellow("• Vá até o whatsapp > Clique nos 3 pontinhos > Dispositivos conectados > Conectar via código > Cole o codigo la e aguarde.")}`
@@ -614,9 +543,9 @@ async function connectToWhatsApp() {
     if (events["group-participants.update"]) {
       try {
         var naga2 = events["group-participants.update"];
-        if (!fs.existsSync(`./corvo_dados/grupos/ATIVAÇÕES/${naga2.id}.json`)) return;
+        if (!fs.existsSync(`./ram/grupos/ATIVAÇÕES/${naga2.id}.json`)) return;
         var jsonGp = JSON.parse(
-          fs.readFileSync(`./corvo_dados/grupos/ATIVAÇÕES/${naga2.id}.json`)
+          fs.readFileSync(`./ram/grupos/ATIVAÇÕES/${naga2.id}.json`)
         );
 
         if (naga2.participants[0].startsWith(tokito.user.id.split(":")[0]))
@@ -945,7 +874,7 @@ async function connectToWhatsApp() {
             } else {
               teks = bye2(mem.split("@")[0]);
             }
-            corvo.sendMessage(mdata_2.id, {
+            ram.sendMessage(mdata_2.id, {
               text: teks,
               mentions: naga2.participants,
             });
@@ -958,14 +887,7 @@ async function connectToWhatsApp() {
 
     if (events["connection.update"]) {
       const update = events["connection.update"];
-      var { connection, lastDisconnect, qr } = update;
-      if (qr && !usePairingCode) {
-        try {
-          const qrcodeTerminal = require("qrcode-terminal");
-          console.log(colors.cyan("\n--- ESCANEIE O QR CODE ABAIXO NO SEU WHATSAPP ---"));
-          qrcodeTerminal.generate(qr, { small: true });
-        } catch (e) { }
-      }
+      var { connection, lastDisconnect } = update;
       const shouldReconnect = new Boom(lastDisconnect?.error)?.output
         .statusCode;
 
@@ -974,11 +896,6 @@ async function connectToWhatsApp() {
           if (shouldReconnect) {
             if (shouldReconnect == 401) {
               console.log(colors.red(datadb.ErrorBaileys401()));
-              // 🐛 FIX 2026-08-13: 401 = sessão deslogada/revogada pelo WhatsApp.
-              // Reconectar com a MESMA sessão morta só repete "Connection Closed"
-              // em loop infinito. Remove a sessão pra reconexão gerar QR/pareamento
-              // novo.
-              try { fs.rmSync(qrcode, { recursive: true, force: true }); } catch (e) { }
             } else if (shouldReconnect == 408) {
               console.log(colors.yellow(datadb.ErrorBaileys_408()));
             } else if (shouldReconnect == 411) {
@@ -1014,13 +931,12 @@ async function connectToWhatsApp() {
         case "open":
           console.log(banner3.string);
           console.log(banner2.string);
-          console.log(banner4.string);
           console.log(
-            `${colors.white("𝐎𝐥𝐚 𝐡𝐮𝐦𝐚𝐧𝐨, 𝐞𝐮 𝐬𝐨𝐮 𝒂 𝒀𝑨𝑲𝑨𝑴𝒀, 𝐚𝐠𝐮𝐚𝐫𝐝𝐞 𝟓 𝐬𝐞𝐠𝐮𝐧𝐝𝐨𝐬")}`
+            `${colors.white("𝐎𝐥𝐚 𝐡𝐮𝐦𝐚𝐧𝐨, 𝐞𝐮 𝐬𝐨𝐮 𝒂 𝑹𝑨𝑴𝐁𝐨𝐭-𝐌𝐃, 𝐚𝐠𝐮𝐚𝐫𝐝𝐞 𝟓 𝐬𝐞𝐠𝐮𝐧𝐝𝐨𝐬")}`
           );
 
-          const frase = "🩷 𝒀𝑨𝑲𝑨𝑴𝒀 𝑪𝑶𝑵𝑬𝑪𝑻𝑨𝑫𝑨... 🩷";
-          const assinatura = "© ⏤͟͟͞͞𝒀𝑨𝑲𝑨𝑴𝒀";
+          const frase = "🩷 𝑹𝑨𝑴-𝑴𝑫 𝑪𝑶𝑵𝑬𝑪𝑻𝑨𝑫𝑨... 🩷";
+          const assinatura = "© ⏤͟͟͞͞RAI DEV";
 
           const largura = Math.max(frase.length, assinatura.length) + 1; // espaço extra
           const moldura = " ".repeat(largura);
@@ -1087,13 +1003,13 @@ ${moldura}
             const eCalendario = emojiCalendario();
 
             const modelos = [
-              `🩷 𝒀𝑨𝑲𝑨𝑴𝒀 conectada às ${eRelogio} ${hora} do dia ${eCalendario} ${data}`,
-              `🤍 𝒀𝑨𝑲𝑨𝑴𝒀 conectada em ${eCalendario} ${data}, às ${eRelogio} ${hora}`,
-              `❤️ 𝒀𝑨𝑲𝑨𝑴𝒀 está online às ${eRelogio} ${hora} — ${eCalendario} ${data}`,
-              `💛 𝒀𝑨𝑲𝑨𝑴𝒀 conectada desde ${eCalendario} ${data} às ${eRelogio} ${hora}`,
-              `🩵 𝒀𝑨𝑲𝑨𝑴𝒀 conectada às ${eRelogio} ${hora} de ${eCalendario} ${data}`,
-              `🩷 𝒀𝑨𝑲𝑨𝑴𝒀 conectada em ${eCalendario} ${data} às ${eRelogio} ${hora}`,
-              `🤍 𝒀𝑨𝑲𝑨𝑴𝒀 conectada — ${eCalendario} ${data} ${eRelogio} ${hora}`,
+              `🩷 Ram conectada às ${eRelogio} ${hora} do dia ${eCalendario} ${data}`,
+              `🤍 Ram conectada em ${eCalendario} ${data}, às ${eRelogio} ${hora}`,
+              `❤️ Ram-Bot está online às ${eRelogio} ${hora} — ${eCalendario} ${data}`,
+              `💛 Ram conectada desde ${eCalendario} ${data} às ${eRelogio} ${hora}`,
+              `🩵 Ram conectada às ${eRelogio} ${hora} de ${eCalendario} ${data}`,
+              `🩷 Ram conectada em ${eCalendario} ${data} às ${eRelogio} ${hora}`,
+              `🤍 Ram conectada — ${eCalendario} ${data} ${eRelogio} ${hora}`,
             ];
 
             return modelos[Math.floor(Math.random() * modelos.length)];
@@ -1133,8 +1049,7 @@ ${moldura}
               await tokito.updateProfileStatus(frase);
               lastBioUpdate = Date.now();
               bioRejeitadaEm = 0; // reset após sucesso
-              // 🔕 FIX 2026-08-13: log removido a pedido — o console não deve
-              // mais exibir "✅ Bio atualizada..." a cada reconexão.
+              console.log(`✅ Bio atualizada (${motivo}) para: ${frase}`);
             } catch (e) {
               const msgErro = (e && e.message) || '';
               const isRate = e && (
@@ -1181,9 +1096,9 @@ ${moldura}
         return;
       }
 
-      const connectToWhatsApp = require("./corvo.js");
-      connectToWhatsApp(upsert, corvo, qrcode)
-        .then(() => { })
+      const connectToWhatsApp = require("./Ram.js");
+      connectToWhatsApp(upsert, ram, qrcode)
+        .then(() => {})
         .catch((error) => {
           console.log("Erro no Bot:", String(error));
         });
@@ -1199,7 +1114,7 @@ ${moldura}
 
         if (groupId && participant) {
           let texto = "";
-
+          
           if (newTag) {
             // Se o usuário colocou uma tag nova
             texto = `🏷️ *NOVA TAG DEFINIDA*\n\nO membro @${participant.split("@")[0]} definiu a sua tag no grupo para: *${newTag}*`;
@@ -1209,7 +1124,7 @@ ${moldura}
           }
 
           // Envia a mensagem marcando o @ do usuário no grupo
-          await corvo.sendMessage(groupId, {
+          await ram.sendMessage(groupId, {
             text: texto,
             mentions: [participant]
           });
@@ -1218,7 +1133,7 @@ ${moldura}
         console.log("Erro no evento de tag do grupo:", e);
       }
     }
-
+    
 
 
     if (events["creds.update"]) {
