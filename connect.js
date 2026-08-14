@@ -411,9 +411,12 @@ const BIO_REJEICAO_ESPERA_MS = 30 * 60 * 1000; // espera pós-rejeição por fre
 async function connectToWhatsApp() {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
   const { state, saveCreds } = await useMultiFileAuthState(qrcode);
-  let version = [2, 3000, 1044409164];
+  let version = [2, 3000, 1015901307];
   try {
-    const vRes = await fetchLatestBaileysVersion();
+    const vRes = await Promise.race([
+      fetchLatestBaileysVersion(),
+      new Promise((_, r) => setTimeout(() => r(new Error("timeout")), 3000))
+    ]);
     if (vRes?.version) version = vRes.version;
   } catch (e) { }
   async function getMessage(key) {
@@ -447,7 +450,7 @@ async function connectToWhatsApp() {
     msgRetryCounterCache,
     printQRInTerminal: false,
     auth: state,
-    browser: ["Ubuntu", "Edge", "110.0.1587.56"],
+    browser: Browsers.ubuntu("Chrome"),
     generateHighQualityLinkPreview: true,
     patchMessageBeforeSending: (message) => {
       const requiresPatch = !!message?.interactiveMessage;
