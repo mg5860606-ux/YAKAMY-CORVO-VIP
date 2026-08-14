@@ -405,9 +405,11 @@ const BIO_MIN_RECONNECT_MS = 2 * 60 * 1000; // mínimo entre updates em reconex�
 const BIO_REJEICAO_ESPERA_MS = 30 * 60 * 1000; // espera pós-rejeição por frequência
 
 async function connectToWhatsApp() {
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-  const { state, saveCreds } = await useMultiFileAuthState(qrcode);
-  const { version, isLatest } = await fetchLatestBaileysVersion();
+  let version = [2, 3000, 1044409164];
+  try {
+    const vRes = await fetchLatestBaileysVersion();
+    if (vRes?.version) version = vRes.version;
+  } catch (e) {}
   async function getMessage(key) {
     // 🐛 FIX 2026-08-13: `store` nunca é declarada no projeto (makeInMemoryStore é
     // importada mas nunca instanciada). `if (store)` lançava ReferenceError em
