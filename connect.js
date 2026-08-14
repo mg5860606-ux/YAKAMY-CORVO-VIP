@@ -425,7 +425,14 @@ async function connectToWhatsApp() {
     }
   }
   const { state, saveCreds } = await useMultiFileAuthState(qrcode);
-  const { version, isLatest } = await fetchLatestBaileysVersion();
+  let version;
+  try {
+    const vRes = await fetchLatestBaileysVersion();
+    version = vRes.version;
+  } catch (e) {
+    version = [2, 3000, 1017554025]; // fallback compatível
+    console.log(colors.yellow("[connect] fetchLatestBaileysVersion falhou, usando versão de fallback: " + version.join(".")));
+  }
   async function getMessage(key) {
     // 🐛 FIX 2026-08-13: `store` nunca é declarada no projeto (makeInMemoryStore é
     // importada mas nunca instanciada). `if (store)` lançava ReferenceError em
@@ -457,7 +464,7 @@ async function connectToWhatsApp() {
   msgRetryCounterCache,
   printQRInTerminal: !usePairingCode,
   auth: state,
-  browser: ["Ubuntu", "Chrome", "20.0.04"],
+  browser: ["Ubuntu", "Chrome", "124.0.0.0"],
   generateHighQualityLinkPreview: true,
   patchMessageBeforeSending: (message) => {
     const requiresPatch = !!message?.interactiveMessage;
