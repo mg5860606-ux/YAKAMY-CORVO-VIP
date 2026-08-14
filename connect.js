@@ -118,7 +118,10 @@ const {
   pushnames,
 } = require("./exports.js");
 
-// Global safety handlers to prevent the process from exiting on unexpected async errors
+// Global safety handlers & warning suppressions
+process.removeAllListeners("warning");
+process.env.NODE_NO_WARNINGS = "1";
+
 process.on("uncaughtException", (err) => {
   console.error("Uncaught exception:", err && err.stack ? err.stack : err);
 });
@@ -326,9 +329,10 @@ function listarPidsConnectJs() {
         try { fs.unlinkSync(psFile); } catch (_) { }
       }
     } else {
-      out = execSync(`pgrep -f "connect\\.js"`, {
+      out = execSync(`pgrep -f "connect\\.js" 2>/dev/null`, {
         encoding: "utf8",
         timeout: 15000,
+        stdio: ["ignore", "pipe", "ignore"],
       });
     }
     return out
