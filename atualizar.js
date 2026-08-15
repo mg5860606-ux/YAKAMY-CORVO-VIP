@@ -50,12 +50,8 @@ const PROTEGIDOS = [
   // 📱 Sessão do WhatsApp (não pode perder!)
   "corvo_dados/qrcode",
 
-  // ⚙️ Config principal do bot (dono/prefixo/nome do bot/API URL)
-  "INFON/DADOS/config.json",
   // ⚙️ Números de dono e configurações de segurança
   "INFON/media/nescessario.json",
-  // ⚙️ Config da IA (admin, chaves, APIs)
-  "corvo-ia/config.js",
   // 🧠 Memória/chaves da IA
   "corvo-ia/data",
 
