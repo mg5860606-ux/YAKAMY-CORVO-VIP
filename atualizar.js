@@ -258,9 +258,7 @@ function main() {
     const npmEnv = isTermux
       ? { ...process.env, HOME: TERMUX_HOME }
       : process.env;
-    const npmCmd = isTermux
-      ? "npm install --legacy-peer-deps --no-audit --no-fund --unsafe-perm"
-      : "npm install --legacy-peer-deps --no-audit --no-fund";
+    const npmCmd = "npm install --legacy-peer-deps --no-audit --no-fund";
 
     const inst = tryRun(npmCmd, { timeout: 540000, env: npmEnv });
     if (!inst.ok) {
