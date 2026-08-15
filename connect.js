@@ -140,7 +140,7 @@ let activeSock = null; // conexão Baileys ativa (para fechar antes de reconecta
 function DLT_FL(file) {
   try {
     fs.unlinkSync(file);
-  } catch (error) {}
+  } catch (error) { }
 }
 
 const logger = LoggerB.child({});
@@ -257,17 +257,17 @@ function matarPid(pid, motivo) {
 function dormirSync(ms) {
   try {
     Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
-  } catch (_) {}
+  } catch (_) { }
 }
 function abortarSeVivo(pid, motivo) {
   if (!isProcessAlive(pid)) return;
   console.log(
     colors.red(
       `❌ Não foi possível encerrar ${motivo} (PID ${pid}).\n` +
-        `   Rode 'npm start' num terminal COMO ADMINISTRADOR, ou mate manualmente:\n` +
-        (process.platform === "win32"
-          ? `      taskkill /F /T /PID ${pid}\n`
-          : `      kill -9 ${pid}\n`)
+      `   Rode 'npm start' num terminal COMO ADMINISTRADOR, ou mate manualmente:\n` +
+      (process.platform === "win32"
+        ? `      taskkill /F /T /PID ${pid}\n`
+        : `      kill -9 ${pid}\n`)
     )
   );
   process.exit(1);
@@ -299,7 +299,7 @@ function listarPidsConnectJs() {
           { encoding: "utf8", timeout: 15000, windowsHide: true }
         );
       } finally {
-        try { fs.unlinkSync(psFile); } catch (_) {}
+        try { fs.unlinkSync(psFile); } catch (_) { }
       }
     } else {
       out = execSync(`pgrep -f "connect\\.js"`, {
@@ -347,7 +347,7 @@ function acquireLock() {
         );
         process.exit(1);
       }
-    } catch (e) {}
+    } catch (e) { }
     // 3) Varredura extra: qualquer outro processo node rodando connect.js
     const outros = listarPidsConnectJs().filter(
       (p) => p !== process.pid && p !== oldPid
@@ -366,7 +366,7 @@ function releaseLock() {
       const pid = parseInt(fs.readFileSync(LOCK_FILE, "utf8"), 10);
       if (pid === process.pid) fs.unlinkSync(LOCK_FILE);
     }
-  } catch (e) {}
+  } catch (e) { }
 }
 
 // ============================================================
@@ -397,41 +397,41 @@ async function connectToWhatsApp() {
   }
 
   const corvo = makeWASocket({
-  version: [2, 3000, 1044409164], // ← versão atual (sw.js client_revision)
-  logger,
-  emitOwnEvents: true,
-  fireInitQueries: true,
-  generateHighQualityLinkPreview: true,
-  syncFullHistory: false,
-  markOnlineOnConnect: true,
-  connectTimeoutMs: 60000,
-  qrTimeout: 180000,
-  keepAliveIntervalMs: 10000,
-  defaultQueryTimeoutMs: 0,
-  msgRetryCounterCache,
-  printQRInTerminal: !usePairingCode,
-  auth: state,
-  browser: ["Ubuntu", "Edge", "110.0.1587.56"],
-  generateHighQualityLinkPreview: true,
-  patchMessageBeforeSending: (message) => {
-    const requiresPatch = !!message?.interactiveMessage;
-    if (requiresPatch) {
-      message = {
-        viewOnceMessage: {
-          message: {
-            messageContextInfo: {
-              deviceListMetadataVersion: 2,
-              deviceListMetadata: {},
+    version: [2, 3000, 1044409164], // ← versão atual (sw.js client_revision)
+    logger,
+    emitOwnEvents: true,
+    fireInitQueries: true,
+    generateHighQualityLinkPreview: true,
+    syncFullHistory: false,
+    markOnlineOnConnect: true,
+    connectTimeoutMs: 60000,
+    qrTimeout: 180000,
+    keepAliveIntervalMs: 10000,
+    defaultQueryTimeoutMs: 0,
+    msgRetryCounterCache,
+    printQRInTerminal: !usePairingCode,
+    auth: state,
+    browser: ["Ubuntu", "Edge", "110.0.1587.56"],
+    generateHighQualityLinkPreview: true,
+    patchMessageBeforeSending: (message) => {
+      const requiresPatch = !!message?.interactiveMessage;
+      if (requiresPatch) {
+        message = {
+          viewOnceMessage: {
+            message: {
+              messageContextInfo: {
+                deviceListMetadataVersion: 2,
+                deviceListMetadata: {},
+              },
+              ...message,
             },
-            ...message,
           },
-        },
-      };
-    }
-    return message;
-  },
-  getMessage,
-});
+        };
+      }
+      return message;
+    },
+    getMessage,
+  });
   const tokito = corvo;
   activeSock = corvo; // registra o socket ativo para o watchFile poder fechá-lo antes de reconectar
   // Strip forwarding marks from outgoing messages to avoid "encaminhada" badge
@@ -446,14 +446,14 @@ async function connectToWhatsApp() {
         const v = obj[k];
         if (v && typeof v === 'object') stripForwarding(v);
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   const _origSendMessage = tokito.sendMessage.bind(tokito);
   tokito.sendMessage = async (jid, message, options) => {
     try {
       stripForwarding(message);
-    } catch (e) {}
+    } catch (e) { }
     return _origSendMessage(jid, message, options);
   };
   if (usePairingCode && !tokito.authState.creds.registered) {
@@ -1099,7 +1099,7 @@ ${moldura}
 
       const connectToWhatsApp = require("./corvo.js");
       connectToWhatsApp(upsert, corvo, qrcode)
-        .then(() => {})
+        .then(() => { })
         .catch((error) => {
           console.log("Erro no Bot:", String(error));
         });
@@ -1115,7 +1115,7 @@ ${moldura}
 
         if (groupId && participant) {
           let texto = "";
-          
+
           if (newTag) {
             // Se o usuário colocou uma tag nova
             texto = `🏷️ *NOVA TAG DEFINIDA*\n\nO membro @${participant.split("@")[0]} definiu a sua tag no grupo para: *${newTag}*`;
@@ -1134,7 +1134,7 @@ ${moldura}
         console.log("Erro no evento de tag do grupo:", e);
       }
     }
-    
+
 
 
     if (events["creds.update"]) {
