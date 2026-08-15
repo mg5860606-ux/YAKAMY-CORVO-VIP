@@ -30,6 +30,13 @@ const { execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
+// Detecta Termux/Android para ajustar variáveis de ambiente do npm
+const isTermux =
+  Boolean(process.env.TERMUX_VERSION) ||
+  (process.env.PREFIX || "").includes("com.termux") ||
+  process.platform === "android";
+const TERMUX_HOME = "/data/data/com.termux/files/home";
+
 const ROOT = __dirname;
 const REPO_URL = "https://github.com/mg5860606-ux/YAKAMY-CORVO-VIP";
 const BACKUP_DIR = path.join(ROOT, "corvo_dados", ".update_backup");
@@ -250,20 +257,43 @@ function main() {
     : "";
   if (pkgAntes !== pkgDepois) {
     log("package.json mudou — instalando dependências (pode demorar)...");
-    const inst = tryRun("npm install --legacy-peer-deps --no-audit --no-fund", {
-      timeout: 540000,
-    });
+
+    // No Termux, define HOME correto e usa --unsafe-perm para evitar erro de permissão
+    const npmEnv = isTermux
+      ? { ...process.env, HOME: TERMUX_HOME }
+      : process.env;
+    const npmCmd = isTermux
+      ? "npm install --legacy-peer-deps --no-audit --no-fund --unsafe-perm"
+      : "npm install --legacy-peer-deps --no-audit --no-fund";
+
+    const inst = tryRun(npmCmd, { timeout: 540000, env: npmEnv });
     if (!inst.ok) {
-      copiar(path.join(BACKUP_DIR, "package.json"), path.join(ROOT, "package.json"));
-      console.log(
-        "ATUALIZAR_ERRO: os arquivos foram atualizados, mas o npm install falhou. " +
-          "O package.json anterior foi restaurado. Execute 'npm install' manualmente antes de reiniciar. " +
-          "Detalhes: " +
-          (inst.out.trim().split("\n").filter(Boolean).slice(-3).join(" | ") || "erro")
-      );
-      process.exit(1);
+      // Se for erro de permissão no Android, avisa mas não aborta — o bot continua
+      // funcionando com as dependências anteriores (que ainda estão em node_modules)
+      const isPermErr =
+        inst.out.includes("permissions") ||
+        inst.out.includes("EACCES") ||
+        inst.out.includes("EPERM");
+      if (isPermErr && isTermux) {
+        copiar(path.join(BACKUP_DIR, "package.json"), path.join(ROOT, "package.json"));
+        log(
+          "⚠️ npm install falhou por permissões no Android. " +
+          "Os arquivos foram atualizados. Execute manualmente no Termux: npm install"
+        );
+        // Não chama process.exit(1) — deixa o update terminar com ATUALIZAR_OK
+      } else {
+        copiar(path.join(BACKUP_DIR, "package.json"), path.join(ROOT, "package.json"));
+        console.log(
+          "ATUALIZAR_ERRO: os arquivos foram atualizados, mas o npm install falhou. " +
+            "O package.json anterior foi restaurado. Execute 'npm install' manualmente antes de reiniciar. " +
+            "Detalhes: " +
+            (inst.out.trim().split("\n").filter(Boolean).slice(-3).join(" | ") || "erro")
+        );
+        process.exit(1);
+      }
+    } else {
+      log("✅ Dependências instaladas.");
     }
-    log("✅ Dependências instaladas.");
   } else {
     log("Dependências inalteradas.");
   }
