@@ -144,6 +144,12 @@ function main() {
   }
   log("Git: " + gitv.out.trim());
 
+  // 0.1) corrige "detected dubious ownership" no Android/Termux
+  //      (ocorre quando a pasta está em /storage/emulated/0 e pertence
+  //       a um UID diferente do usuário Termux que está rodando o git)
+  tryRun(`git config --global safe.directory "${ROOT}"`);
+  tryRun("git config --global safe.directory '*'");
+
   // 1) garante que a pasta é um repositório git
   if (!fs.existsSync(path.join(ROOT, ".git"))) {
     log("Inicializando repositório git...");
