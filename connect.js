@@ -153,6 +153,8 @@ try {
 }
 
 const datadb = require("./ARQUIVES/datadb.msg.js");
+if (!fs.existsSync("./ram")) fs.mkdirSync("./ram", { recursive: true });
+if (!fs.existsSync("./ram/qrcode")) fs.mkdirSync("./ram/qrcode", { recursive: true });
 var qrcode = "./ram/qrcode";
 const usePairingCode = process.argv.includes("sim");
 if (!usePairingCode && !fs.existsSync(`${qrcode}/creds.json`))
@@ -381,7 +383,6 @@ const BIO_REJEICAO_ESPERA_MS = 30 * 60 * 1000; // espera pós-rejeição por fre
 async function connectToWhatsApp() {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
   const { state, saveCreds } = await useMultiFileAuthState(qrcode);
-  const { version, isLatest } = await fetchLatestBaileysVersion();
   async function getMessage(key) {
     if (store) {
       try {
@@ -1096,7 +1097,7 @@ ${moldura}
         return;
       }
 
-      const connectToWhatsApp = require("./Ram.js");
+      const connectToWhatsApp = require("./corvo.js");
       connectToWhatsApp(upsert, ram, qrcode)
         .then(() => {})
         .catch((error) => {
