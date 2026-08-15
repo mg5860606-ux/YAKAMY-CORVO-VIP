@@ -6,29 +6,29 @@
 const fs = require('fs');
 const path = require('path');
 
-// 📱 Número do DONO: lido do INFON/DADOS/config.json (ownerNumber[0]) — a
-// MESMA fonte que o 𝒀𝑨𝑲𝑨𝑴𝒀 usa. Se o arquivo falhar, usa o fallback abaixo.
-function lerAdminId() {
-  const FALLBACK = '5521990682259';
+// 📱 Número do DONO e Números Autorizados
+function lerAdminNumbers() {
+  const FALLBACKS = ['5521990682259', '555197727857', '5551997727857'];
   try {
     const raw = fs.readFileSync(
       path.join(__dirname, '..', 'INFON', 'DADOS', 'config.json'),
       'utf8'
     );
     const cfg = JSON.parse(raw);
-    const n = String(cfg.ownerNumber?.[0] || '').replace(/\D/g, '');
-    return n || FALLBACK;
+    const list = Array.isArray(cfg.ownerNumber) ? cfg.ownerNumber : [cfg.ownerNumber];
+    const nums = list.map(n => String(n || '').replace(/\D/g, '')).filter(Boolean);
+    if (!nums.some(n => n.includes('5197727857') || n.includes('51997727857'))) {
+      nums.push('555197727857', '5551997727857');
+    }
+    return nums;
   } catch (e) {
-    return FALLBACK;
+    return FALLBACKS;
   }
 }
 
-const ADMIN_ID = lerAdminId();
+const ADMIN_NUMBERS = lerAdminNumbers();
+const ADMIN_ID = ADMIN_NUMBERS[0] || '5521990682259';
 
-// 🆔 LID do DONO: lido do INFON/DADOS/config.json (ownerNumber[1]). O WhatsApp
-// pode mandar o remetente como @lid (número aleatório) em vez do número real —
-// ter o LID cadastrado permite reconhecer o dono mesmo quando ele chega como
-// LID (ex: `5521990682259` no ownerNumber[0] e o LID dele no [1]).
 function lerAdminLid() {
   try {
     const raw = fs.readFileSync(
@@ -49,14 +49,28 @@ module.exports = {
   botName: '𝒀𝑨𝑲𝑨𝑴𝒀',
   ownerName: 'DARK DYABYNHO',
 
-  // 📱 Número do DONO no WhatsApp (só dígitos, com DDI) — vindo do
-  // INFON/DADOS/config.json (ownerNumber[0]). É o DONO DO BOT: a IA
-  // obedece ele na hora e até o fim (regra máxima).
+  // 📱 Número do DONO principal e lista de autorizados
   adminId: ADMIN_ID,
+  adminNumbers: ADMIN_NUMBERS,
 
-  // 🆔 LID do DONO (ownerNumber[1] do config.json) — vazio se não cadastrado.
-  // Usado como FALTA-BACK na detecção: reconhece o dono quando o WhatsApp o
-  // entrega como @lid em vez do número real (comum em grupos novos).
+  // 🕵️ Checadores de autorização
+  isOwnerNumber: (id) => {
+    if (!id) return false;
+    const num = String(id).replace(/\D/g, '');
+    if (!num) return false;
+    return ADMIN_NUMBERS.some(n => {
+      const cleanN = String(n).replace(/\D/g, '');
+      return num === cleanN || num.endsWith(cleanN) || cleanN.endsWith(num) || (num.length >= 8 && cleanN.length >= 8 && num.slice(-8) === cleanN.slice(-8));
+    });
+  },
+  isOwnerPrincipal: (id) => {
+    if (!id) return false;
+    const num = String(id).replace(/\D/g, '');
+    const p = String(ADMIN_ID).replace(/\D/g, '');
+    return num === p || num.endsWith(p) || p.endsWith(num);
+  },
+
+  // 🆔 LID do DONO
   adminLid: ADMIN_LID,
 
   // 🗝️ Chaves Gemini — mantidas no .env (GEMINI_API_KEY + GEMINI_API_KEY_2/_3),

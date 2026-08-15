@@ -204,8 +204,14 @@ function extraQuote(msgId) {
 // Gemini oferece. Usa as MESMAS chaves Gemini do bot (rotação em quota/erro).
 // Retorna Buffer MP3. É a PRIMEIRA opção do ttsToAudio(); Edge TTS fica de
 // fallback (grátis e sem chave) caso a API falhe.
-const MODELO_TTS_GEMINI = 'gemini-3.1-flash-tts-preview';
-const MODELO_TTS_GEMINI_ALT = 'gemini-2.5-flash-preview-tts'; // fallback de modelo
+// 🎙 Modelos TTS em ordem de prioridade: o 2.5-flash-preview-tts é o mais
+// estável e funciona na conta free. O 3.1-flash-tts-preview fica por último
+// pois recebe 503 (sobrecarga) com frequência no plano gratuito.
+const MODELOS_TTS_GEMINI = [
+  'gemini-2.5-flash-preview-tts', // ✅ funciona na conta free (1ª opção)
+  'gemini-2.5-flash-tts',         // ✅ alias estável
+  'gemini-3.1-flash-tts-preview', // ⚡ novo mas 503 frequente no free
+];
 const VOZ_GEMINI = 'Kore';
 
 /**
@@ -301,10 +307,13 @@ async function ttsGemini(texto) {
   // próprio Gemini-TTS): tom casual, brasileiro, com o sarcasmo leve da persona
   // — a voz soa como pessoa conversando, não narrando.
   const prompt = `Fale em português brasileiro, de forma NATURAL e casual, como uma mulher brasileira conversando de boa no WhatsApp — tom leve, com um toque de sarcasmo e zoeira quando fizer sentido, sem soar robótico nem narrando. Texto: ${t}`;
-  const modelos = [MODELO_TTS_GEMINI, MODELO_TTS_GEMINI_ALT];
+  // 🔁 Itera MODELO→CHAVE (não chave→modelo): assim o modelo que funciona
+  // (gemini-2.5-flash-preview-tts) é testado em TODAS as chaves antes de
+  // passar pro próximo — evita que uma chave com 403/503 no modelo bom
+  // desvie pra um modelo ruim com outra chave boa.
   let ultimoErro = null;
-  for (const chave of chaves) {
-    for (const modelo of modelos) {
+  for (const modelo of MODELOS_TTS_GEMINI) {
+    for (const chave of chaves) {
       try {
         const r = await axios.post(
           `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${chave}`,
@@ -319,8 +328,8 @@ async function ttsGemini(texto) {
               }
             }
           },
-          // ⏱ Timeout curto por tentativa: se uma pendurar, cai pro próximo modelo/chave
-          { timeout: 25000, headers: { 'Content-Type': 'application/json' } }
+          // ⏱ Timeout por tentativa: falha rápida em 503/403 → próxima combinação
+          { timeout: 20000, headers: { 'Content-Type': 'application/json' } }
         );
         // 📊 Conta o uso do TTS no /apistatus (mesmo padrão do resto do bot)
         try {
@@ -337,7 +346,7 @@ async function ttsGemini(texto) {
         throw new Error('conversão vazia');
       } catch (e) {
         ultimoErro = e;
-        // 429/403/404 → tenta próxima chave/modelo
+        // 403/429/503 → tenta próxima chave, depois próximo modelo
       }
     }
   }

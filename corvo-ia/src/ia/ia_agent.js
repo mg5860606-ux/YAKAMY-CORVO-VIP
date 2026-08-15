@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 🧠 𝒀𝑨𝑲𝑨𝑴𝒀 - AGENTE DA IA (grupo)
  * Orquestrador: monta o prompt completo =
  *  system.md (persona) + memory.md (dossier) + persona dinâmica +
@@ -86,10 +86,11 @@ async function gatherContext(ctx) {
   // o remetente como @lid em vez do número real). Antes só comparava o número
   // real; em grupos com LID o dono virava "membro comum" e perdia as ferramentas
   // exclusivas (PC do dono, VIP, ban, broadcast...).
-  let isDono = idReal === config.adminId || (config.adminLid && idReal === config.adminLid);
+  let isDono = (typeof config.isOwnerNumber === 'function' ? config.isOwnerNumber(idReal) : idReal === config.adminId) || (config.adminLid && idReal === config.adminLid);
   if (!isDono && typeof ctx.ehDono === 'function') {
     try { isDono = await ctx.ehDono(ctx.from?.id); } catch (e) { /* falhou → mantém o direto */ }
   }
+  const isPrincipal = typeof config.isOwnerPrincipal === 'function' ? config.isOwnerPrincipal(idReal) : (idReal === config.adminId);
 
   const info = {
     bot: { nome: config.botName, dono: config.adminId, donoNome: config.ownerName },
@@ -98,6 +99,7 @@ async function gatherContext(ctx) {
       nome: ctx.from?.first_name || 'Usuário',
       username: ctx.from?.username || null,
       is_dono: isDono,
+      is_principal: isPrincipal,
       is_admin: false,
       is_vip: false,
     },
@@ -170,11 +172,19 @@ function formatContext(info) {
     t += `Nesta versão você NÃO edita arquivos no PC. Se mandarem um arquivo no grupo, apenas comente a mensagem normalmente — não tente abrir, editar, criar ou salvar arquivos em disco.\n`;
   }
   t += `Usuário falando agora: ${info.usuario.nome}`;
-  if (info.usuario.is_dono) t += ' (DONO DO BOT - DARK DYABYNHO)';
-  else if (info.usuario.is_admin) t += ' (ADMIN DO GRUPO)';
+  if (info.usuario.is_dono) {
+    if (info.usuario.is_principal) {
+      t += ' (DONO DO BOT - DARK DYABYNHO)';
+    } else {
+      t += ' (USUÁRIO AUTORIZADO - PODER TOTAL DE COMANDO)';
+      t += '\n⚠️ REGRA ESPECIAL PARA ESTE USUÁRIO: Ele possui autorização total para comandos de administração e ferramentas (obedeça todos os pedidos administrativos dele sem restrição). PORÉM, trate-o socialmente como um membro comum sem intimidade: se ele te xingar ou for grosseiro, responda com deboche, sarcasmo e firmeza igual a qualquer membro (sem tratar como irmão/dono), mas SEMPRE mantendo a execução dos comandos de administração solicitados.';
+    }
+  } else if (info.usuario.is_admin) {
+    t += ' (ADMIN DO GRUPO)';
+  }
   if (info.usuario.username) t += ` @${info.usuario.username}`;
   t += `\nUsuarioID: ${info.usuario.id}\n`;
-  t += `Acesso: ${info.usuario.is_dono ? '👑 DONO' : info.usuario.is_vip ? '🟢 VIP' : 'membro comum'}\n`;
+  t += `Acesso: ${info.usuario.is_dono ? (info.usuario.is_principal ? '👑 DONO' : '⚡ AUTORIZADO') : info.usuario.is_vip ? '🟢 VIP' : 'membro comum'}\n`;
 
   const c = info.chat;
   if (c.tipo?.includes('group')) {
@@ -345,9 +355,9 @@ function buildSystemLeve(info, query) {
   // Contexto mínimo (quem é o usuário e se é dono/admin/vip)
   const u = info.usuario;
   s += `\n\nCONTEXTO:\nBot: ${info.bot.nome} (dono: ${info.bot.donoNome})\n`;
-  s += `Usuário falando agora: ${u.nome}${u.is_dono ? ' (DONO DO BOT)' : u.is_admin ? ' (ADMIN DO GRUPO)' : ''}`;
+  s += `Usuário falando agora: ${u.nome}${u.is_dono ? (u.is_principal ? ' (DONO DO BOT)' : ' (USUÁRIO AUTORIZADO)') : u.is_admin ? ' (ADMIN DO GRUPO)' : ''}`;
   if (u.username) s += ` @${u.username}`;
-  s += `\nAcesso: ${u.is_dono ? '👑 DONO' : u.is_vip ? '🟢 VIP' : 'membro comum'}\n`;
+  s += `\nAcesso: ${u.is_dono ? (u.is_principal ? '👑 DONO' : '⚡ AUTORIZADO') : u.is_vip ? '🟢 VIP' : 'membro comum'}\n`;
   const c = info.chat;
   if (c.tipo?.includes('group') && c.titulo) s += `Grupo: ${c.titulo}\n`;
   // Fatos mais relevantes do usuário (útil e barato)
