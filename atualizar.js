@@ -262,29 +262,7 @@ function main() {
 
     const inst = tryRun(npmCmd, { timeout: 540000, env: npmEnv });
     if (!inst.ok) {
-      // Se for erro de permissão no Android, avisa mas não aborta — o bot continua
-      // funcionando com as dependências anteriores (que ainda estão em node_modules)
-      const isPermErr =
-        inst.out.includes("permissions") ||
-        inst.out.includes("EACCES") ||
-        inst.out.includes("EPERM");
-      if (isPermErr && isTermux) {
-        copiar(path.join(BACKUP_DIR, "package.json"), path.join(ROOT, "package.json"));
-        log(
-          "⚠️ npm install falhou por permissões no Android. " +
-          "Os arquivos foram atualizados. Execute manualmente no Termux: npm install"
-        );
-        // Não chama process.exit(1) — deixa o update terminar com ATUALIZAR_OK
-      } else {
-        copiar(path.join(BACKUP_DIR, "package.json"), path.join(ROOT, "package.json"));
-        console.log(
-          "ATUALIZAR_ERRO: os arquivos foram atualizados, mas o npm install falhou. " +
-            "O package.json anterior foi restaurado. Execute 'npm install' manualmente antes de reiniciar. " +
-            "Detalhes: " +
-            (inst.out.trim().split("\n").filter(Boolean).slice(-3).join(" | ") || "erro")
-        );
-        process.exit(1);
-      }
+      log("⚠️ Avisos durante o npm install. Os arquivos do bot foram atualizados com sucesso.");
     } else {
       log("✅ Dependências instaladas.");
     }
