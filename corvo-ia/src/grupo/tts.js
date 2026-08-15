@@ -147,11 +147,9 @@ function ttsEdge(texto, voz = VOZ_PADRAO) {
         // 🎚 Prosódia NATURAL e variada: em vez de pitch 0Hz/rate 0% (que soa
         // robótico/monótono), sorteia um leve tom e ritmo por chamada — a voz
         // fica mais humana e menos "lida por máquina".
-        const pitchHz = Math.floor(Math.random() * 4);      // +0Hz a +3Hz
-        const ratePct = 5 + Math.floor(Math.random() * 11); // +5% a +15% (mais vivo)
         const ssml =
           `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='pt-BR'>` +
-          `<voice name='${voz}'><prosody pitch='+${pitchHz}Hz' rate='+${ratePct}%' volume='+0%'>${escaparXml(texto)}</prosody></voice></speak>`;
+          `<voice name='${voz}'><prosody pitch='+0Hz' rate='+0%' volume='+0%'>${escaparXml(texto)}</prosody></voice></speak>`;
         sock.send(
           `X-RequestId:${uuid()}\r\n` +
             'Content-Type:application/ssml+xml\r\n' +
@@ -314,39 +312,48 @@ async function ttsGemini(texto) {
   let ultimoErro = null;
   for (const modelo of MODELOS_TTS_GEMINI) {
     for (const chave of chaves) {
-      try {
-        const r = await axios.post(
-          `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${chave}`,
-          {
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              responseModalities: ['AUDIO'],
-              speechConfig: {
-                voiceConfig: {
-                  prebuiltVoiceConfig: { voiceName: VOZ_GEMINI }
+      let tentativas = 0;
+      while (tentativas < 2) {
+        tentativas++;
+        try {
+          const r = await axios.post(
+            `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${chave}`,
+            {
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                responseModalities: ['AUDIO'],
+                speechConfig: {
+                  voiceConfig: {
+                    prebuiltVoiceConfig: { voiceName: VOZ_GEMINI }
+                  }
                 }
               }
+            },
+            { timeout: 20000, headers: { 'Content-Type': 'application/json' } }
+          );
+          try {
+            const { recordUsage } = require('../ia/ia_gemini');
+            const tokensTTS = r.data?.usageMetadata?.totalTokenCount || r.data?.usage?.totalTokens || 0;
+            recordUsage(tokensTTS);
+          } catch (e) {}
+          const bloco = acharBlocoAudio(r.data);
+          if (!bloco || !bloco.data) throw new Error('resposta sem áudio');
+          const pcm = Buffer.from(bloco.data, 'base64');
+          if (pcm.length < 500) throw new Error('áudio vazio');
+          const mp3 = await pcmL16ParaMp3(pcm, bloco.sample_rate || 24000, bloco.channels || 1);
+          if (mp3 && mp3.length >= 500) return mp3;
+          throw new Error('conversão vazia');
+        } catch (e) {
+          ultimoErro = e;
+          const msg = String(e?.response?.data?.error?.message || e?.message || '');
+          if (msg.includes('429') || msg.includes('quota') || e?.response?.status === 429) {
+            if (tentativas === 1) {
+              await new Promise(r => setTimeout(r, 1200));
+              continue; // tenta de novo 1x após 1.2s de pausa
             }
-          },
-          // ⏱ Timeout por tentativa: falha rápida em 503/403 → próxima combinação
-          { timeout: 20000, headers: { 'Content-Type': 'application/json' } }
-        );
-        // 📊 Conta o uso do TTS no /apistatus (mesmo padrão do resto do bot)
-        try {
-          const { recordUsage } = require('../ia/ia_gemini');
-          const tokensTTS = r.data?.usageMetadata?.totalTokenCount || r.data?.usage?.totalTokens || 0;
-          recordUsage(tokensTTS);
-        } catch (e) { /* falha no contador não derruba a voz */ }
-        const bloco = acharBlocoAudio(r.data);
-        if (!bloco || !bloco.data) throw new Error('resposta sem áudio');
-        const pcm = Buffer.from(bloco.data, 'base64');
-        if (pcm.length < 500) throw new Error('áudio vazio');
-        const mp3 = await pcmL16ParaMp3(pcm, bloco.sample_rate || 24000, bloco.channels || 1);
-        if (mp3 && mp3.length >= 500) return mp3;
-        throw new Error('conversão vazia');
-      } catch (e) {
-        ultimoErro = e;
-        // 403/429/503 → tenta próxima chave, depois próximo modelo
+          }
+          break; // vai pra próxima chave
+        }
       }
     }
   }
