@@ -153,9 +153,9 @@ try {
 }
 
 const datadb = require("./ARQUIVES/datadb.msg.js");
-if (!fs.existsSync("./ram")) fs.mkdirSync("./ram", { recursive: true });
-if (!fs.existsSync("./ram/qrcode")) fs.mkdirSync("./ram/qrcode", { recursive: true });
-var qrcode = "./ram/qrcode";
+if (!fs.existsSync("./corvo_dados")) fs.mkdirSync("./corvo_dados", { recursive: true });
+if (!fs.existsSync("./corvo_dados/qrcode")) fs.mkdirSync("./corvo_dados/qrcode", { recursive: true });
+var qrcode = "./corvo_dados/qrcode";
 const usePairingCode = process.argv.includes("sim");
 if (!usePairingCode && !fs.existsSync(`${qrcode}/creds.json`))
   console.log(
@@ -229,7 +229,7 @@ const msgRetryCounterCache = new NodeCache();
 // (2 conexões com a mesma credencial derrubam as duas no WhatsApp.)
 // execSync já vem do require('./exports.js') no topo.
 // ============================================================
-const LOCK_FILE = __dirname + "/ram/bot.lock";
+const LOCK_FILE = __dirname + "/corvo_dados/bot.lock";
 function isProcessAlive(pid) {
   try {
     process.kill(pid, 0);
@@ -288,7 +288,7 @@ function listarPidsConnectJs() {
       // Espelha a varredura do restart.sh (via .ps1 temporário pra evitar
       // problemas de escape de aspas no cmd)
       const psFile =
-        __dirname + "/ram/_scan_connect_" + process.pid + ".ps1";
+        __dirname + "/corvo_dados/_scan_connect_" + process.pid + ".ps1";
       fs.writeFileSync(
         psFile,
         "Get-CimInstance Win32_Process -Filter \"Name='node.exe'\" | Where-Object { $_.CommandLine -match 'connect\\.js' } | Select-Object -ExpandProperty ProcessId\n"
@@ -396,7 +396,7 @@ async function connectToWhatsApp() {
     return Promise.resolve({});
   }
 
-  const ram = makeWASocket({
+  const corvo = makeWASocket({
   version: [2, 3000, 1044409164], // ← versão atual (sw.js client_revision)
   logger,
   emitOwnEvents: true,
@@ -432,8 +432,8 @@ async function connectToWhatsApp() {
   },
   getMessage,
 });
-  const tokito = ram;
-  activeSock = ram; // registra o socket ativo para o watchFile poder fechá-lo antes de reconectar
+  const tokito = corvo;
+  activeSock = corvo; // registra o socket ativo para o watchFile poder fechá-lo antes de reconectar
   // Strip forwarding marks from outgoing messages to avoid "encaminhada" badge
   function stripForwarding(obj) {
     try {
@@ -544,9 +544,9 @@ async function connectToWhatsApp() {
     if (events["group-participants.update"]) {
       try {
         var naga2 = events["group-participants.update"];
-        if (!fs.existsSync(`./ram/grupos/ATIVAÇÕES/${naga2.id}.json`)) return;
+        if (!fs.existsSync(`./corvo_dados/grupos/ATIVAÇÕES/${naga2.id}.json`)) return;
         var jsonGp = JSON.parse(
-          fs.readFileSync(`./ram/grupos/ATIVAÇÕES/${naga2.id}.json`)
+          fs.readFileSync(`./corvo_dados/grupos/ATIVAÇÕES/${naga2.id}.json`)
         );
 
         if (naga2.participants[0].startsWith(tokito.user.id.split(":")[0]))
@@ -1098,7 +1098,7 @@ ${moldura}
       }
 
       const connectToWhatsApp = require("./corvo.js");
-      connectToWhatsApp(upsert, ram, qrcode)
+      connectToWhatsApp(upsert, corvo, qrcode)
         .then(() => {})
         .catch((error) => {
           console.log("Erro no Bot:", String(error));
