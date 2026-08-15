@@ -48,32 +48,12 @@ function fonte(termo) {
 
 /**
  * Busca os metadados (título/canal/duração/thumbnail) do 1º resultado sem baixar.
+ * Usa youtube-dl-exec diretamente (sem yt-search, que pode estar quebrado no Termux).
  */
 async function buscarMeta(termo) {
   try {
     console.log('[YTDLP] Buscando metadados para:', termo);
 
-    // 1️⃣ Tenta primeiro via yt-search (puro JS, 100% compatível com Termux)
-    try {
-      const yts = require('yt-search');
-      const res = await yts(termo);
-      const video = res && res.videos && res.videos[0];
-      if (video) {
-        console.log('[YTDLP] ✅ Metadados encontrados via yt-search:', video.title);
-        return {
-          ok: true,
-          titulo: video.title,
-          canal: video.author ? video.author.name : 'Desconhecido',
-          duracao: video.timestamp || '--:--',
-          thumb: video.thumbnail || video.image || null,
-          url: video.url
-        };
-      }
-    } catch (errYts) {
-      console.warn('[YTDLP] yt-search falhou, tentando fallback com yt-dlp:', errYts.message);
-    }
-
-    // 2️⃣ Fallback para youtube-dl-exec
     const saida = await youtubedl(fonte(termo), Object.assign({}, BASE_OPTS, {
       dumpSingleJson: true,
       skipDownload: true,
@@ -83,6 +63,7 @@ async function buscarMeta(termo) {
     if (!j || !j.title) {
       return { ok: false, erro: 'Sem resultados.' };
     }
+    console.log('[YTDLP] ✅ Metadados encontrados:', j.title);
     return {
       ok: true,
       titulo: j.title,
