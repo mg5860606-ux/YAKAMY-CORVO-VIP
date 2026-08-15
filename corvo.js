@@ -11684,6 +11684,50 @@ ${q}
           }
           break;
         ////////////////////////////////////////////////////
+        case "iasodono":
+        case "iasodono1":
+          if (!SoDono)
+            return reply(mess.onlyOwner(), {
+              quoted: selorai(pushname, sender),
+            });
+          {
+            const pathIASoDono = path.join(__dirname, "corvo_dados", "iasodono.json");
+            let ativoIASoDono = false;
+            try {
+              if (fs.existsSync(pathIASoDono)) {
+                ativoIASoDono = Boolean(JSON.parse(fs.readFileSync(pathIASoDono, "utf8")).ativo);
+              }
+            } catch (e) {}
+
+            const cmdArg = args[0] ? args[0].toLowerCase() : "";
+            if (cmdArg === "on" || cmdArg === "1" || cmdArg === "ativar") {
+              ativoIASoDono = true;
+            } else if (cmdArg === "off" || cmdArg === "0" || cmdArg === "desativar") {
+              ativoIASoDono = false;
+            } else {
+              ativoIASoDono = !ativoIASoDono;
+            }
+
+            try {
+              const dirData = path.dirname(pathIASoDono);
+              if (!fs.existsSync(dirData)) fs.mkdirSync(dirData, { recursive: true });
+              fs.writeFileSync(pathIASoDono, JSON.stringify({ ativo: ativoIASoDono }, null, 2));
+            } catch (e) {
+              console.error("Erro ao salvar iasodono.json:", e);
+            }
+
+            if (ativoIASoDono) {
+              reply("> 👑 *IA SÓ DONO ATIVADA!*\n\nA partir de agora, a IA (𝒀𝑨𝑲𝑨𝑴𝒀) só responderá às mensagens do Dono do bot.", {
+                quoted: selorai(pushname, sender),
+              });
+            } else {
+              reply("> 🔓 *IA SÓ DONO DESATIVADA!*\n\nA IA (𝒀𝑨𝑲𝑨𝑴𝒀) voltou a responder a todos os usuários normalmente.", {
+                quoted: selorai(pushname, sender),
+              });
+            }
+          }
+          break;
+        ////////////////////////////////////////////////////
         case "admon":
           if (!SoDono)
             return reply(mess.onlyOwner(), {

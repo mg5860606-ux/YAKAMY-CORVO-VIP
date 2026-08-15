@@ -591,6 +591,21 @@ async function processar(upsert, corvo, qrcode) {
 
       if (!(await deveResponder(upsert, msg, ctx, prefix))) return;
 
+      // 👑 RESTRIÇÃO IASODONO: se ativado pelo comando /iasodono, a IA só responde ao Dono
+      try {
+        const pIASoDono = path.join(__dirname, '..', 'corvo_dados', 'iasodono.json');
+        if (fs.existsSync(pIASoDono)) {
+          const stIASoDono = JSON.parse(fs.readFileSync(pIASoDono, 'utf8'));
+          if (stIASoDono && stIASoDono.ativo) {
+            const senderNum = String(ctx.from?.id || '').replace(/\D/g, '');
+            const adminNum = String(config.adminId || '').replace(/\D/g, '');
+            const adminLid = String(config.adminLid || '').replace(/\D/g, '');
+            const ehDonoRemetente = (adminNum && senderNum === adminNum) || (adminLid && senderNum === adminLid);
+            if (!ehDonoRemetente) return; // ignora quem não é o dono
+          }
+        }
+      } catch (e) {}
+
       // 👑 RESTRIÇÃO (dono no grupo): em grupos, a IA só responde onde o
       // DONO está presente. Se o dono não for membro (saiu/expulso), fica
       // muda. DM (privado) NÃO é afetado. Cache de 10min evita martelar API.

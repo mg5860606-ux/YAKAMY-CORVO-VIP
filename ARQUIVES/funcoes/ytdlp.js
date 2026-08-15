@@ -1,30 +1,37 @@
 'use strict';
+const fs = require('fs');
+const path = require('path');
+const youtubedl = require('youtube-dl-exec');
+
 /**
  * 📥 dlp (yt-dlp) — Download de áudio/vídeo do YouTube para o 𝒀𝑨𝑲𝑨𝑴𝒀.
- *
- * Usa o pacote `youtube-dl-exec` (que baixa o binário do yt-dlp) + `ffmpeg-static`
- * para não depender de ffmpeg instalado no sistema (que não existe no PATH da máquina).
- *
- * Suporta:
- *  - busca por nome (ex: "midnight")  → ytsearch1
- *  - link direto do YouTube           → usa a URL como está
  */
+const isTermux = Boolean(
+  process.env.TERMUX_VERSION || 
+  (process.env.PREFIX && process.env.PREFIX.includes('com.termux')) || 
+  process.platform === 'android'
+);
+
 function getFfmpegPath() {
+  if (isTermux) return 'ffmpeg';
   try {
     const p = require('ffmpeg-static');
     if (p && typeof p === 'string' && fs.existsSync(p)) return p;
   } catch (e) {}
   return 'ffmpeg';
 }
-const ffmpegPath = getFfmpegPath();
 
+const ffmpegPath = getFfmpegPath();
 const DIR_DOWNLOADS = path.join(__dirname, '..', '..', 'corvo_dados', 'downloads');
 
 const BASE_OPTS = {
   noPlaylist: true,
-  ffmpegLocation: path.dirname(ffmpegPath),
   jsRuntimes: 'node:' + process.execPath,
 };
+
+if (ffmpegPath !== 'ffmpeg') {
+  BASE_OPTS.ffmpegLocation = path.dirname(ffmpegPath);
+}
 
 function garantirDir() {
   try { fs.mkdirSync(DIR_DOWNLOADS, { recursive: true }); } catch (e) {}
@@ -45,6 +52,28 @@ function fonte(termo) {
 async function buscarMeta(termo) {
   try {
     console.log('[YTDLP] Buscando metadados para:', termo);
+
+    // 1️⃣ Tenta primeiro via yt-search (puro JS, 100% compatível com Termux)
+    try {
+      const yts = require('yt-search');
+      const res = await yts(termo);
+      const video = res && res.videos && res.videos[0];
+      if (video) {
+        console.log('[YTDLP] ✅ Metadados encontrados via yt-search:', video.title);
+        return {
+          ok: true,
+          titulo: video.title,
+          canal: video.author ? video.author.name : 'Desconhecido',
+          duracao: video.timestamp || '--:--',
+          thumb: video.thumbnail || video.image || null,
+          url: video.url
+        };
+      }
+    } catch (errYts) {
+      console.warn('[YTDLP] yt-search falhou, tentando fallback com yt-dlp:', errYts.message);
+    }
+
+    // 2️⃣ Fallback para youtube-dl-exec
     const saida = await youtubedl(fonte(termo), Object.assign({}, BASE_OPTS, {
       dumpSingleJson: true,
       skipDownload: true,
@@ -52,10 +81,8 @@ async function buscarMeta(termo) {
     }));
     const j = (typeof saida === 'string') ? JSON.parse(saida) : saida;
     if (!j || !j.title) {
-      console.error('[YTDLP] Sem resultados encontrados para:', termo);
       return { ok: false, erro: 'Sem resultados.' };
     }
-    console.log('[YTDLP] ✅ Metadados encontrados:', j.title);
     return {
       ok: true,
       titulo: j.title,
@@ -64,6 +91,7 @@ async function buscarMeta(termo) {
         ? `${Math.floor(j.duration / 60)}:${String(Math.floor(j.duration % 60)).padStart(2, '0')}`
         : '--:--',
       thumb: j.thumbnail || null,
+      url: j.webpage_url || j.url
     };
   } catch (e) {
     console.error('[YTDLP] ❌ Erro ao buscar metadados:', e.message || String(e));
@@ -78,26 +106,46 @@ async function baixar(termo, tipo) {
   garantirDir();
   const ext = tipo === 'audio' ? 'mp3' : 'mp4';
   const out = path.join(DIR_DOWNLOADS, `play_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`);
-  const opts = Object.assign({}, BASE_OPTS, { output: out });
-  if (tipo === 'audio') {
-    opts.extractAudio = true;
-    opts.audioFormat = 'mp3';
-    opts.audioQuality = 0;
-    opts.format = 'bestaudio/best';
-  } else {
-    // 🎬 Cap 720p p/ o arquivo não estourar o limite de envio do WhatsApp
-    opts.format = 'best[ext=mp4][height<=720]/best[height<=720]';
-    opts.mergeOutputFormat = 'mp4';
-  }
+  
+  // 1️⃣ Tenta download nativo com yt-dlp
   try {
+    const opts = Object.assign({}, BASE_OPTS, { output: out });
+    if (tipo === 'audio') {
+      opts.extractAudio = true;
+      opts.audioFormat = 'mp3';
+      opts.audioQuality = 0;
+      opts.format = 'bestaudio/best';
+    } else {
+      opts.format = 'best[ext=mp4][height<=720]/best[height<=720]';
+      opts.mergeOutputFormat = 'mp4';
+    }
     await youtubedl(fonte(termo), opts);
     const st = fs.statSync(out);
-    if (st.size < 1000) throw new Error('download vazio');
-    return { ok: true, arquivo: out, tamanho: st.size };
+    if (st.size > 1000) return { ok: true, arquivo: out, tamanho: st.size };
   } catch (e) {
+    console.warn(`[YTDLP] Download nativo via yt-dlp falhou (${e.message}), tentando API fallback...`);
     try { fs.unlinkSync(out); } catch (err) {}
-    return { ok: false, erro: e.message || String(e) };
   }
+
+  // 2️⃣ Fallback via API caso yt-dlp/ffmpeg nativo não esteja no Termux
+  try {
+    const axios = require('axios');
+    let apiUrl = '';
+    if (tipo === 'audio') {
+      apiUrl = `https://api.bronxyshost.com.br/api-bronxys/play?nome_url=${encodeURIComponent(termo)}&apikey=bronxys`;
+    } else {
+      apiUrl = `https://okarun-api.com.br/api/xvideos?url=${encodeURIComponent(termo)}&apikey=okarun`;
+    }
+    const resp = await axios.get(apiUrl, { responseType: 'arraybuffer', timeout: 45000 });
+    if (resp.status === 200 && resp.data && resp.data.length > 5000) {
+      fs.writeFileSync(out, resp.data);
+      return { ok: true, arquivo: out, tamanho: resp.data.length };
+    }
+  } catch (apiErr) {
+    console.error('[YTDLP] ❌ Fallback de API falhou:', apiErr.message);
+  }
+
+  return { ok: false, erro: 'Não foi possível baixar no Termux. Execute no Termux: pkg install ffmpeg python -y' };
 }
 
 const baixarAudio = (termo) => baixar(termo, 'audio');
