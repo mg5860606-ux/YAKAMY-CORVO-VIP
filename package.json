@@ -60,12 +60,11 @@
   "update_date": "05-08-2025",
   "main": "corvo.js",
   "scripts": {
-    "start": "bash start.sh",
-    "restart": "bash restart.sh",
+    "start": "node connect.js sim",
+    "start:qr": "node connect.js",
     "atualizar": "node atualizar.js",
     "test": "node connect.js",
-    "termux": "bash start.sh termux",
-    "start:unix": "bash start.sh sim"
+    "termux": "node connect.js sim"
   },
   "repository": {
     "type": "git",
